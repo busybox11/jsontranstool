@@ -2,11 +2,46 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Hello World!</title>
+    <title>jsontranstool</title>
 
   </head>
-  <body>
-    <h1>💖 Hello World!</h1>
-    <p>Welcome to your Electron application.</p>
+  <body x-data class="h-screen flex flex-row bg-stone-900 text-white">
+    <!-- Sidebar -->
+    <div class="flex flex-col flex-initial w-96 flex-shrink-0">
+      <div class="h-full bg-stone-800 p-6 overflow-auto relative">
+        <!-- Open folder button -->
+        <button @click="$store.files.open()" class="sticky top-0 px-6 py-4 transition bg-stone-700 border-2 border-stone-500 hover:border-stone-400 hover:shadow-lg rounded-2xl w-full flex flex-row items-center gap-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          <span>Open Folder</span>
+        </button>
+
+        <!-- File list -->
+        <div class="flex flex-col gap-3">
+          <template x-for="file in $store.files.getFilteredFiles()" :key="file" class="flex flex-row items-center gap-4 mt-4">
+            <div class="flex flex-row items-center gap-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text flex-shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <span x-text="file" class="truncate"></span>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-col gap-1 bg-stone-700 px-6 py-4">
+        <h5 class="text-lg font-semibold">Filters</h5>
+
+        <div>
+          <small class="uppercase font-semibold text-white/70">File regex</small>
+          <input x-model="$store.files.regexFile" spellcheck="false" type="text" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="w-full h-full">
+      <div class="flex flex-row items-center px-6 py-2 h-12 w-full bg-stone-800/50">
+        <span x-text="$store.files.directory || 'No selected folder'" :class="{ 'text-white/70': !$store.files.directory }"></span>
+      </div>
+    </div>
   </body>
 </html>

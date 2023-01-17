@@ -26,6 +26,27 @@
  * ```
  */
 
+import Alpine from 'alpinejs'
 import './index.css';
 
-console.log('👋 This message is being logged by "renderer.js", included via webpack');
+window.Alpine = Alpine
+
+Alpine.store('files', {
+  directory: undefined,
+  files: [],
+  regexFile: 'translation-[A-Z]{2}.json',
+
+  getFilteredFiles() {
+    return this.files.filter(file => file.match(new RegExp(this.regexFile)))
+  },
+
+  open() {
+    PRELOAD_CONTEXT.openDialog().then((response) => {
+      console.log(response);
+      this.directory = response.directory
+      this.files = response.files
+    })
+  }
+})
+
+Alpine.start()
