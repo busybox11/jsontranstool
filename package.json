@@ -1,0 +1,25 @@
+{
+  "name": "jsontranstool",
+  "version": "1.0.0",
+  "description": "Electron app that manages JSON-based translation files",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/busybox11/jsontranstool.git"
+  },
+  "keywords": [
+    "translations",
+    "json",
+    "automation",
+    "electron"
+  ],
+  "author": "busybox11",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/busybox11/jsontranstool/issues"
+  },
+  "homepage": "https://github.com/busybox11/jsontranstool#readme"
+}
