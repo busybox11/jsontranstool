@@ -29,12 +29,34 @@
 import Alpine from 'alpinejs'
 import './index.css'
 
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
+
+const sampleCodeString = `{
+  "languageCode": "EN",
+  "languageName": "English",
+  "strings": {
+    "hello": "Hello World!",
+    ...
+  }
+}
+`
+
+monaco.editor.defineTheme('customMonacoTheme', {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [],
+  colors: {
+    'editor.background': '#100f0e00'
+  }
+})
+
 window.Alpine = Alpine
 
 Alpine.store('files', {
   directory: undefined,
   files: [],
   regexFiles: 'translation-[A-Z]{2}.json',
+  selectedFile: undefined,
 
   getFilteredFiles() {
     return this.files.filter(file => file.match(new RegExp(this.regexFiles)))
@@ -46,13 +68,35 @@ Alpine.store('files', {
     return pathData.regexFiles
   },
 
-  open() {
+  openFolder() {
     PRELOAD_CONTEXT.openDialog().then((response) => {
       console.log(response)
       this.directory = response.directory
       this.files = response.files
       this.regexFiles = this.getSavedRegexForCurrentDirectory() ?? 'translation-[A-Z]{2}.json'
     })
+  },
+
+  previewFile(file) {
+    PRELOAD_CONTEXT.readFile(this.directory + '/' + file)
+      .then((content) => {
+        this.selectedFile = {
+          file,
+          content
+        }
+
+        if (monaco.editor.getModels().length == 0) {
+          monaco.editor.create(document.getElementById('container'), {
+            value: sampleCodeString,
+            language: 'json',
+            theme: 'customMonacoTheme',
+            automaticLayout: true,
+            fixedOverflowWidgets: true
+          })
+        } else {
+          monaco.editor.getModels()[0].setValue(content)
+        }
+      })
   },
 
   saveRegex() {

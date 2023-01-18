@@ -21,6 +21,12 @@ contextBridge.exposeInMainWorld('PRELOAD_CONTEXT', {
       })
     })
   },
+
+  readFile(filePath) {
+    return new Promise((resolve, reject) => {
+      resolve(fs.readFileSync(filePath, 'utf8'))
+    })
+  }
 })
 
 contextBridge.exposeInMainWorld('store', {
