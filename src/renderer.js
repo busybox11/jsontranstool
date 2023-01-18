@@ -28,6 +28,7 @@
 
 import Alpine from 'alpinejs'
 import './index.css'
+import get from 'lodash/get';
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
 
@@ -57,6 +58,16 @@ Alpine.store('files', {
   files: [],
   regexFiles: 'translation-[A-Z]{2}.json',
   selectedFile: undefined,
+  formConfig: {
+    translationStringsJSONPath: '',
+    languageKeyCode: '',
+    bypasses: [],
+    directoryPathTargetOutputDuplicate: '',
+    outputDuplicateFileNameStructure: ''
+  },
+  currentConfig: {},
+  forceShowConfig: false,
+  everyFileContent: {},
 
   getFilteredFiles() {
     return this.files.filter(file => file.match(new RegExp(this.regexFiles)))
@@ -68,6 +79,12 @@ Alpine.store('files', {
     return pathData.regexFiles
   },
 
+  updateCurrentConfig() {
+    let paths = store.get('paths', {})
+    let pathData = paths[this.directory] || {}
+    this.currentConfig = pathData
+  },
+
   openFolder() {
     PRELOAD_CONTEXT.openDialog().then((response) => {
       if (response.directory) {
@@ -76,9 +93,23 @@ Alpine.store('files', {
         this.files = response.files
         this.regexFiles = this.getSavedRegexForCurrentDirectory() ?? 'translation-[A-Z]{2}.json'
         this.selectedFile = undefined
-        monaco.editor.getModels()[0].dispose()
+        this.updateCurrentConfig()
+        if (monaco.editor.getModels().length > 0) {
+          this.closeFilePreview()
+        }
       }
     })
+  },
+
+  async readEveryFilteredFileInDirectory() {
+    let outFiles = {}
+
+    for (let file of this.getFilteredFiles()) {
+      let fileContent = await PRELOAD_CONTEXT.readFile(this.directory + '/' + file)
+      outFiles[file] = JSON.parse(fileContent)
+    }
+
+    return outFiles
   },
 
   previewFile(file) {
@@ -103,6 +134,11 @@ Alpine.store('files', {
       })
   },
 
+  closeFilePreview() {
+    this.selectedFile = undefined
+    monaco.editor.getModels()[0].dispose()
+  },
+
   saveRegex() {
     if (this.directory) {
       // Get already existing path object
@@ -116,6 +152,72 @@ Alpine.store('files', {
           regexFiles: this.regexFiles
         }
       })
+    }
+  },
+
+  addNewBypassRow() {
+    this.formConfig.bypasses.push({
+      target: undefined,
+      source: undefined
+    })
+  },
+
+  openFolderForPathTargetOutputDuplicate() {
+    PRELOAD_CONTEXT.openDialog().then((response) => {
+      if (response.directory) {
+        this.formConfig.directoryPathTargetOutputDuplicate = response.directory
+      }
+    })
+  },
+
+  toggleShowConfig() {
+    if (this.currentConfig.languageKeyCode) {
+      this.formConfig = {...this.currentConfig}
+      this.forceShowConfig = !this.forceShowConfig
+    }
+  },
+
+  async saveDirectoryConf() {
+    const config = JSON.parse(JSON.stringify(this.formConfig))
+
+    if (config.translationStringsJSONPath && config.languageKeyCode) {
+      if (!config.outputDuplicateFileNameStructure || (config.directoryPathTargetOutputDuplicate && config.outputDuplicateFileNameStructure.includes('{languageCode}'))) {
+        let everyFile = await this.readEveryFilteredFileInDirectory()
+        this.everyFileContent = {...everyFile}
+
+        // Check if all files have the same structure
+        // If they don't, return an error
+        if (!Object.values(everyFile).every((content) => {
+          const languageKey = get(content, config.languageKeyCode)
+          return (typeof languageKey === 'string' && languageKey.length > 0)
+        })) {
+          alert('Language key code not found in all files')
+          return
+        }
+
+        if (!Object.values(everyFile).every((content) => {
+          const translationsObj = get(content, config.translationStringsJSONPath)
+          return (typeof translationsObj === 'object' && Object.keys(translationsObj).length > 0)
+        })) {
+          alert('Translation strings object not found in all files')
+          return
+        }
+
+        let paths = store.get('paths', {})
+        let pathData = paths[this.directory] || {}
+
+        store.set('paths', {
+          ...paths,
+          [this.directory]: {
+            ...pathData,
+            ...config
+          }
+        })
+
+        this.forceShowConfig = false
+
+        this.updateCurrentConfig()
+      }
     }
   }
 })
