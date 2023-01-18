@@ -8,7 +8,7 @@
   <body x-data class="h-screen flex flex-row bg-stone-900 text-white overflow-hidden">
     <!-- Sidebar -->
     <div class="flex flex-col flex-initial w-96 flex-shrink-0">
-      <div class="h-full bg-stone-800 p-6 overflow-auto relative">
+      <div class="flex flex-col h-full bg-stone-800 p-6 overflow-auto relative">
         <!-- Open folder button -->
         <button @click="$store.files.openFolder()" class="sticky top-0 px-6 py-4 transition bg-stone-700 border-2 border-stone-500 hover:border-stone-400 hover:shadow-lg rounded-2xl w-full flex flex-row items-center gap-4">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
@@ -16,13 +16,21 @@
         </button>
 
         <!-- File list -->
-        <div class="flex flex-col">
+        <div class="flex flex-col h-full">
           <template x-for="file in $store.files.getFilteredFiles()" :key="file" class="flex flex-row items-center gap-4 mt-4">
             <button @click="$store.files.previewFile(file)" class="flex flex-row items-center gap-4 py-2 hover:bg-white/10 cursor-pointer -mx-6 px-6" :class="{ 'bg-white/5': $store.files.selectedFile?.file == file }">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text flex-shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               <span x-text="file" class="truncate"></span>
             </button>
           </template>
+
+          <div x-show="$store.files.directory && $store.files.getFilteredFiles().length == 0" class="flex flex-col items-center justify-center gap-4 opacity-80 h-full text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-minus"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            <div class="leading-4">
+              <p class="leading-5 mb-2">No files found with the current regex filter</p>
+              <small>Tip: Empty the "File regex" input to see all the files</small>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -47,11 +55,46 @@
       </div>
 
       <div class="grid grid-cols-2 h-full w-full">
-        <div id="container" class="h-full w-full">
-          <div x-cloak x-show="$store.files.directory != undefined && $store.files.selectedFile?.file == undefined" class="flex flex-col gap-4 items-center justify-center h-full w-full opacity-50">
+        <div id="container" class="h-full w-full bg-stone-800/20">
+          <div x-cloak x-show="$store.files.directory == undefined" class="flex flex-col gap-4 items-center justify-center h-full w-full opacity-50 px-6 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            <h3 class="text-xl font-semibold">No folder opened</h3>
+            <span>Click on the "Open Folder" button to select a folder</span>
+          </div>
+
+          <div x-cloak x-show="$store.files.directory != undefined && $store.files.selectedFile?.file == undefined" class="flex flex-col gap-4 items-center justify-center h-full w-full opacity-50 px-6 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-            <h2 class="text-xl font-semibold">No file selected</h2>
+            <h3 class="text-xl font-semibold">No file selected</h3>
             <span>Click on a file on the sidebar to preview it</span>
+          </div>
+        </div>
+
+        <div x-show="$store.files.directory != undefined" class="flex flex-col gap-4 h-full w-full px-6 py-4">
+          <h2 class="text-2xl font-semibold">Initial configuration</h2>
+
+          <div>
+            <small class="uppercase font-semibold text-white/70">Language code</small>
+            <input spellcheck="false" type="text" placeholder="Key of language code string in JSON (e.g. 'meta.languageCode')" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+          </div>
+
+          <div>
+            <small class="uppercase font-semibold text-white/70">Translations string object</small>
+            <input spellcheck="false" type="text" placeholder="Key of translations strings in JSON (e.g. 'strings')" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+          </div>
+
+          <div>
+            <small class="uppercase font-semibold text-white/70">Bypass language using default lang</small>
+
+            <div class="flex flex-row items-center gap-3 mt-1">
+              <input spellcheck="false" type="text" placeholder="Target code (e.g. IT)" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 outline-none">
+              <span class="flex-shrink-0">will default to</span>
+              <input spellcheck="false" type="text" placeholder="Default code (e.g. EN)" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 outline-none">
+            </div>
+
+            <button class="flex flex-row items-center gap-3 justify-start px-4 py-2 w-full text-sm rounded-lg transition bg-white/10 hover:bg-white/30 mt-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add
+            </button>
           </div>
         </div>
       </div>

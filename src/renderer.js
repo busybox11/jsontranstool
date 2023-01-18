@@ -70,10 +70,14 @@ Alpine.store('files', {
 
   openFolder() {
     PRELOAD_CONTEXT.openDialog().then((response) => {
-      console.log(response)
-      this.directory = response.directory
-      this.files = response.files
-      this.regexFiles = this.getSavedRegexForCurrentDirectory() ?? 'translation-[A-Z]{2}.json'
+      if (response.directory) {
+        console.log(response)
+        this.directory = response.directory
+        this.files = response.files
+        this.regexFiles = this.getSavedRegexForCurrentDirectory() ?? 'translation-[A-Z]{2}.json'
+        this.selectedFile = undefined
+        monaco.editor.getModels()[0].dispose()
+      }
     })
   },
 
@@ -87,7 +91,7 @@ Alpine.store('files', {
 
         if (monaco.editor.getModels().length == 0) {
           monaco.editor.create(document.getElementById('container'), {
-            value: sampleCodeString,
+            value: content,
             language: 'json',
             theme: 'customMonacoTheme',
             automaticLayout: true,
@@ -106,14 +110,6 @@ Alpine.store('files', {
       let pathData = paths[this.directory] || {}
 
       store.set('paths', {
-        ...paths,
-        [this.directory]: {
-          ...pathData,
-          regexFiles: this.regexFiles
-        }
-      })
-
-      console.log({
         ...paths,
         [this.directory]: {
           ...pathData,
