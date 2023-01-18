@@ -37,7 +37,8 @@
   },
   "dependencies": {
     "alpinejs": "^3.11.1",
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "electron-store": "^8.1.0"
   },
   "repository": {
     "type": "git",

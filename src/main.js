@@ -1,4 +1,11 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const Store = require('electron-store')
+
+const store = new Store({
+  defaults: {
+    paths: {}
+  }
+})
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -15,7 +22,7 @@ const createWindow = () => {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       nodeIntegration: true
     },
-  });
+  })
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
@@ -26,11 +33,19 @@ const createWindow = () => {
     })
 
     event.sender.send('openFolderDialogResponse', selectedPath)
-  });
+  })
+
+  ipcMain.on('electron-store-get', async (event, key, defaultVal) => {
+    event.returnValue = store.get(key, defaultVal)
+  })
+
+  ipcMain.on('electron-store-set', async (event, key, val) => {
+    store.set(key, val)
+  })
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
-};
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

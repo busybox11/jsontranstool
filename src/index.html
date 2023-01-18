@@ -28,11 +28,14 @@
 
       <!-- Filters -->
       <div class="flex flex-col gap-1 bg-stone-700 px-6 py-4">
-        <h5 class="text-lg font-semibold">Filters</h5>
+        <div class="flex flex-row items-center justify-between">
+          <h5 class="text-lg font-semibold">Filters</h5>
+          <button @click="$store.files.saveRegex()" class="px-3 py-1 text-sm rounded-lg transition bg-white/10 hover:bg-white/30 focus:ring focus:ring-white/50">Save</button>
+        </div>
 
         <div>
           <small class="uppercase font-semibold text-white/70">File regex</small>
-          <input x-model="$store.files.regexFile" spellcheck="false" type="text" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+          <input x-model="$store.files.regexFiles" spellcheck="false" type="text" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
         </div>
       </div>
     </div>

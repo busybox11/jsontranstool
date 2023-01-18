@@ -27,25 +27,56 @@
  */
 
 import Alpine from 'alpinejs'
-import './index.css';
+import './index.css'
 
 window.Alpine = Alpine
 
 Alpine.store('files', {
   directory: undefined,
   files: [],
-  regexFile: 'translation-[A-Z]{2}.json',
+  regexFiles: 'translation-[A-Z]{2}.json',
 
   getFilteredFiles() {
-    return this.files.filter(file => file.match(new RegExp(this.regexFile)))
+    return this.files.filter(file => file.match(new RegExp(this.regexFiles)))
+  },
+
+  getSavedRegexForCurrentDirectory() {
+    let paths = store.get('paths', {})
+    let pathData = paths[this.directory] || {}
+    return pathData.regexFiles
   },
 
   open() {
     PRELOAD_CONTEXT.openDialog().then((response) => {
-      console.log(response);
+      console.log(response)
       this.directory = response.directory
       this.files = response.files
+      this.regexFiles = this.getSavedRegexForCurrentDirectory() ?? 'translation-[A-Z]{2}.json'
     })
+  },
+
+  saveRegex() {
+    if (this.directory) {
+      // Get already existing path object
+      let paths = store.get('paths', {})
+      let pathData = paths[this.directory] || {}
+
+      store.set('paths', {
+        ...paths,
+        [this.directory]: {
+          ...pathData,
+          regexFiles: this.regexFiles
+        }
+      })
+
+      console.log({
+        ...paths,
+        [this.directory]: {
+          ...pathData,
+          regexFiles: this.regexFiles
+        }
+      })
+    }
   }
 })
 
