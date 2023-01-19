@@ -198,8 +198,8 @@ Alpine.store('files', {
 
   openFolderForPathTargetOutputDuplicate() {
     PRELOAD_CONTEXT.openDialog().then((response) => {
-      if (response.directory) {
-        this.formConfig.directoryPathTargetOutputDuplicate = response.directory
+      if (response) {
+        this.formConfig.directoryPathTargetOutputDuplicate = response
       }
     })
   },
