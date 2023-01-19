@@ -83,7 +83,14 @@ Alpine.store('files', {
   },
 
   getFilteredFiles() {
-    return this.files.filter(file => file.match(new RegExp(this.regexFiles)))
+    return this.files
+                  .filter(file => file.match(new RegExp(this.regexFiles)))
+                  .map(file => {
+                    return {
+                      name: file,
+                      type: file.split('.').pop().toLowerCase()
+                    }
+                  })
   },
 
   getSavedRegexForCurrentDirectory() {
