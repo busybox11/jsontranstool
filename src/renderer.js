@@ -29,6 +29,8 @@
 import Alpine from 'alpinejs'
 import './index.css'
 import get from 'lodash/get';
+import union from 'lodash/union';
+import cloneDeep from 'lodash/cloneDeep';
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
 
@@ -68,6 +70,8 @@ Alpine.store('files', {
   currentConfig: {},
   forceShowConfig: false,
   everyFileContent: {},
+  allTranslationsKeys: [],
+  searchTranslationsQuery: '',
 
   shouldShowFilePreview() { return (this.directory == undefined || !this.currentConfig.languageKeyCode) || (this.forceShowConfig || this.selectedFile !== undefined) },
 
@@ -107,6 +111,16 @@ Alpine.store('files', {
     this.currentConfig = pathData
   },
 
+  updateTranslationsKeys() {
+    if (this.currentConfig.translationStringsJSONPath) {
+      const everyFileContent = this.everyFileContent
+
+      for (let file of Object.values(everyFileContent)) {
+        this.allTranslationsKeys = union(this.allTranslationsKeys, Object.keys(get(file, this.currentConfig.translationStringsJSONPath)))
+      }
+    }
+  },
+
   openCustomDirectoryPath(path) {
     let response = PRELOAD_CONTEXT.directoryData(path)
     console.log(response)
@@ -119,6 +133,7 @@ Alpine.store('files', {
 
     this.readEveryFilteredFileInDirectory().then(everyFile => {
       this.everyFileContent = {...everyFile}
+      this.updateTranslationsKeys()
     })
 
     if (monaco.editor.getModels().length > 0) {
@@ -213,12 +228,12 @@ Alpine.store('files', {
   },
 
   async saveDirectoryConf() {
-    const config = JSON.parse(JSON.stringify(this.formConfig))
+    const config = cloneDeep(this.formConfig)
 
     if (config.translationStringsJSONPath && config.languageKeyCode) {
       if (!config.outputDuplicateFileNameStructure || (config.directoryPathTargetOutputDuplicate && config.outputDuplicateFileNameStructure.includes('{languageCode}'))) {
         let everyFile = await this.readEveryFilteredFileInDirectory()
-        this.everyFileContent = {...everyFile}
+        this.everyFileContent = cloneDeep(everyFile)
 
         // Check if all files have the same structure
         // If they don't, return an error
@@ -279,6 +294,10 @@ Alpine.store('files', {
     return Object.keys(this.everyFileContent).map((file) => {
       return get(this.everyFileContent[file], this.currentConfig.languageKeyCode)
     })
+  },
+
+  get getFilteredTranslationKeys() {
+    return this.allTranslationsKeys?.filter(key => key.toLowerCase().includes(this.searchTranslationsQuery.toLowerCase()))
   }
 })
 
