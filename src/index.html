@@ -90,7 +90,7 @@
         <svg @click="$store.files.toggleShowConfig()" :class="$store.files.currentConfig.languageKeyCode ? 'cursor-pointer' : 'opacity-20'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       </div>
 
-      <div class="flex-1 min-h-0 grid grid-cols-2 h-full w-full">
+      <div class="flex-1 min-h-0 grid h-full w-full" :class="$store.files.shouldShowFilePreview() ? 'grid-cols-2' : 'grid-cols-1'">
         <div x-show="$store.files.shouldShowFilePreview()" id="container" class="h-full w-full bg-stone-800/20">
           <div x-cloak x-show="$store.files.directory == undefined" class="flex flex-col items-center justify-center h-full w-full opacity-50 px-6 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder mb-4"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
@@ -156,14 +156,29 @@
         </form>
 
         <div x-show="$store.files.directory != undefined && $store.files.currentConfig.languageKeyCode && !$store.files.forceShowConfig" class="flex flex-col gap-4 px-6 py-4">
-          <h2 class="text-2xl font-semibold">Manage translations</h2>
+          <h2 class="text-2xl font-semibold pb-2">Manage translations</h2>
 
           <div>
-            <h4 class="text-lg">Active languages</h4>
+            <h4 class="text-lg">Detected languages</h4>
             <div class="flex flex-row gap-3 overflow-auto pb-3 mt-1">
               <template x-for="language in $store.files.getDetectedLanguages()" :key="language">
                 <span x-text="language" class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800"></span>
               </template>
+
+              <small x-show="$store.files.getDetectedLanguages().length == 0" class="text-sm text-white/60 italic">No languages detected</small>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-lg">Default language assignments</h4>
+            <div class="flex flex-row gap-3 overflow-auto pb-3 mt-1">
+              <template x-for="bypass in $store.files.currentConfig.bypasses" :key="bypass.target">
+                <div class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800">
+                  <span x-text="bypass.target"></span> > <span x-text="bypass.source"></span>
+                </div>
+              </template>
+
+              <small x-show="$store.files.currentConfig.bypasses.length == 0" class="text-sm text-white/60 italic">No configured assignments</small>
             </div>
           </div>
         </div>

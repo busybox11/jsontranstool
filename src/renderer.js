@@ -110,6 +110,7 @@ Alpine.store('files', {
   openCustomDirectoryPath(path) {
     let response = PRELOAD_CONTEXT.directoryData(path)
     console.log(response)
+    this.everyFileContent = {}
     this.directory = response.directory
     this.files = response.files
     this.regexFiles = this.getSavedRegexForCurrentDirectory() ?? 'translation-[A-Z]{2}.json'
