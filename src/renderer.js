@@ -69,6 +69,8 @@ Alpine.store('files', {
   forceShowConfig: false,
   everyFileContent: {},
 
+  shouldShowFilePreview() { return (this.directory == undefined || !this.currentConfig.languageKeyCode) || (this.forceShowConfig || this.selectedFile !== undefined) },
+
   getKnownDirectories() {
     const allPaths = Object.keys(store.get('paths'))
     return allPaths.map(path => {
@@ -113,6 +115,11 @@ Alpine.store('files', {
     this.regexFiles = this.getSavedRegexForCurrentDirectory() ?? 'translation-[A-Z]{2}.json'
     this.selectedFile = undefined
     this.updateCurrentConfig()
+
+    this.readEveryFilteredFileInDirectory().then(everyFile => {
+      this.everyFileContent = {...everyFile}
+    })
+
     if (monaco.editor.getModels().length > 0) {
       this.closeFilePreview()
     }
@@ -132,8 +139,8 @@ Alpine.store('files', {
     let outFiles = {}
 
     for (let file of this.getFilteredFiles()) {
-      let fileContent = await PRELOAD_CONTEXT.readFile(this.directory + '/' + file)
-      outFiles[file] = JSON.parse(fileContent)
+      let fileContent = await PRELOAD_CONTEXT.readFile(this.directory + '/' + file.name)
+      outFiles[file.name] = JSON.parse(fileContent)
     }
 
     return outFiles
@@ -265,6 +272,12 @@ Alpine.store('files', {
         this.updateCurrentConfig()
       }
     }
+  },
+
+  getDetectedLanguages() {
+    return Object.keys(this.everyFileContent).map((file) => {
+      return get(this.everyFileContent[file], this.currentConfig.languageKeyCode)
+    })
   }
 })
 

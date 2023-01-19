@@ -91,15 +91,15 @@
       </div>
 
       <div class="flex-1 min-h-0 grid grid-cols-2 h-full w-full">
-        <div id="container" class="h-full w-full bg-stone-800/20">
-          <div x-cloak x-show="$store.files.directory == undefined" class="flex flex-col gap-4 items-center justify-center h-full w-full opacity-50 px-6 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        <div x-show="$store.files.shouldShowFilePreview()" id="container" class="h-full w-full bg-stone-800/20">
+          <div x-cloak x-show="$store.files.directory == undefined" class="flex flex-col items-center justify-center h-full w-full opacity-50 px-6 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder mb-4"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
             <h3 class="text-xl font-semibold">No folder opened</h3>
             <span>Click on the "Open Folder" button to select a folder</span>
           </div>
 
-          <div x-cloak x-show="$store.files.directory != undefined && $store.files.selectedFile?.file == undefined" class="flex flex-col gap-4 items-center justify-center h-full w-full opacity-50 px-6 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+          <div x-cloak x-show="$store.files.directory != undefined && $store.files.selectedFile?.file == undefined" class="flex flex-col items-center justify-center h-full w-full opacity-50 px-6 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file mb-4"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
             <h3 class="text-xl font-semibold">No file selected</h3>
             <span>Click on a file on the sidebar to preview it</span>
           </div>
@@ -157,6 +157,15 @@
 
         <div x-show="$store.files.directory != undefined && $store.files.currentConfig.languageKeyCode && !$store.files.forceShowConfig" class="flex flex-col gap-4 px-6 py-4">
           <h2 class="text-2xl font-semibold">Manage translations</h2>
+
+          <div>
+            <h4 class="text-lg">Active languages</h4>
+            <div class="flex flex-row gap-3 overflow-auto pb-3 mt-1">
+              <template x-for="language in $store.files.getDetectedLanguages()" :key="language">
+                <span x-text="language" class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800"></span>
+              </template>
+            </div>
+          </div>
         </div>
       </div>
     </div>
