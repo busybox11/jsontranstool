@@ -69,6 +69,19 @@ Alpine.store('files', {
   forceShowConfig: false,
   everyFileContent: {},
 
+  getKnownDirectories() {
+    const allPaths = Object.keys(store.get('paths'))
+    return allPaths.map(path => {
+      let pathSplit = path.split('/')
+      const dirName = pathSplit.pop()
+      const dirPath = pathSplit.join('/')
+
+      return {
+        dirName, dirPath, fullPath: path
+      }
+    })
+  },
+
   getFilteredFiles() {
     return this.files.filter(file => file.match(new RegExp(this.regexFiles)))
   },
@@ -85,19 +98,22 @@ Alpine.store('files', {
     this.currentConfig = pathData
   },
 
+  openCustomDirectoryPath(path) {
+    let response = PRELOAD_CONTEXT.directoryData(path)
+    console.log(response)
+    this.directory = response.directory
+    this.files = response.files
+    this.regexFiles = this.getSavedRegexForCurrentDirectory() ?? 'translation-[A-Z]{2}.json'
+    this.selectedFile = undefined
+    this.updateCurrentConfig()
+    if (monaco.editor.getModels().length > 0) {
+      this.closeFilePreview()
+    }
+  },
+
   openFolder() {
-    PRELOAD_CONTEXT.openDialog().then((response) => {
-      if (response.directory) {
-        console.log(response)
-        this.directory = response.directory
-        this.files = response.files
-        this.regexFiles = this.getSavedRegexForCurrentDirectory() ?? 'translation-[A-Z]{2}.json'
-        this.selectedFile = undefined
-        this.updateCurrentConfig()
-        if (monaco.editor.getModels().length > 0) {
-          this.closeFilePreview()
-        }
-      }
+    PRELOAD_CONTEXT.openDialog().then((selectedPath) => {
+      this.openCustomDirectoryPath(selectedPath)
     })
   },
 
@@ -201,6 +217,25 @@ Alpine.store('files', {
         })) {
           alert('Translation strings object not found in all files')
           return
+        }
+
+        // Check if all bypasses are valid
+        const allLanguageKeys = Object.values(everyFile).map((content) => get(content, config.languageKeyCode))
+        for (let bypass of config.bypasses) {
+          if (bypass.target && bypass.source) {
+            if (!allLanguageKeys.includes(bypass.target)) {
+              alert('Target language key not found in all files')
+              return
+            }
+
+            if (!allLanguageKeys.includes(bypass.source)) {
+              alert('Source language key not found in all files')
+              return
+            }
+          } else {
+            alert('Bypasses must have a target and a source')
+            return
+          }
         }
 
         let paths = store.get('paths', {})

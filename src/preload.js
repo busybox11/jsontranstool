@@ -10,16 +10,20 @@ contextBridge.exposeInMainWorld('PRELOAD_CONTEXT', {
       ipcRenderer.send('openFolderDialog')
 
       ipcRenderer.on('openFolderDialogResponse', (event, response) => {
-        resolve({
-          directory: response?.[0],
-          files: (!response?.[0])
-                    ? []
-                    : fs.readdirSync(response[0], { withFileTypes: true })
-                        .filter(fileItem => fileItem.isFile())
-                        .map(fileItem => fileItem.name)
-        })
+        resolve(response?.[0])
       })
     })
+  },
+
+  directoryData(path) {
+    return {
+      directory: path,
+      files: (!path)
+        ? []
+        : fs.readdirSync(path, { withFileTypes: true })
+          .filter(fileItem => fileItem.isFile())
+          .map(fileItem => fileItem.name)
+    }
   },
 
   readFile(filePath) {
