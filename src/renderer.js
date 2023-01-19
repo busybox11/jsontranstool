@@ -120,6 +120,10 @@ Alpine.store('files', {
 
   openFolder() {
     PRELOAD_CONTEXT.openDialog().then((selectedPath) => {
+      if (selectedPath == undefined && this.directory != undefined) {
+        return
+      }
+
       this.openCustomDirectoryPath(selectedPath)
     })
   },
