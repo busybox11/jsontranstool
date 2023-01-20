@@ -124,6 +124,7 @@ Alpine.store('files', {
   openCustomDirectoryPath(path) {
     let response = PRELOAD_CONTEXT.directoryData(path)
     console.log(response)
+    this.forceShowConfig = false
     this.everyFileContent = {}
     this.directory = response.directory
     this.files = response.files
