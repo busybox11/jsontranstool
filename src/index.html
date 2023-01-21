@@ -189,18 +189,50 @@
               <span x-show="$store.files.searchTranslationsQuery != ''" x-text="$store.files.getFilteredTranslationKeys?.length + ' search results'" class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800"></span>
             </div>
 
-            <div class="flex flex-col overflow-auto mt-2 border border-white/50 rounded-xl h-full overflow-hidden">
+            <div x-show="$store.files.selectedTranslationObj.key == null" class="flex flex-col overflow-auto mt-2 border border-white/50 rounded-xl h-full overflow-hidden">
               <div class="flex flex-row items-center bg-stone-800 transition border-b border-white/10 focus-within:border-white/50 hover:border-white/40">
-                <input type="text" x-model="$store.files.searchTranslationsQuery" placeholder="Search translations" class="px-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
+                <input type="text" spellcheck="false" x-model="$store.files.searchTranslationsQuery" placeholder="Search translations" class="px-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
                 <button @click="$store.files.searchTranslationsQuery = ''" x-show="$store.files.searchTranslationsQuery != ''" class="p-3">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
               </div>
+
               <div class="flex flex-col overflow-auto">
+                <button @click="$store.files.createNewTranslation()" :disabled="$store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())" class="flex flex-row items-center gap-3 px-4 py-3 transition bg-transparent hover:bg-stone-800/80 text-white/70 border-b border-white/10">
+                  <svg x-show="!$store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  <span x-show="$store.files.searchTranslationsQuery == ''" class="text-sm">New translation key</span>
+                  <span x-show="$store.files.searchTranslationsQuery != '' && !$store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())" class="text-sm">
+                    Add new translation key "<span x-text="$store.files.searchTranslationsQuery"></span>"
+                  </span>
+                  <span x-show="$store.files.searchTranslationsQuery != '' && $store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())" class="text-sm">
+                    Translation key "<span x-text="$store.files.searchTranslationsQuery"></span>" already exists
+                  </span>
+                </button>
                 <template x-for="key in $store.files.getFilteredTranslationKeys" :key="key">
-                  <button class="text-left px-4 py-2 transition bg-transparent hover:bg-stone-800/80">
+                  <button @click="$store.files.showTranslationKey(key)" class="text-left px-4 py-2 transition bg-transparent hover:bg-stone-800/80">
                     <span x-text="key" class="text-sm font-semibold text-white/70"></span>
                   </button>
+                </template>
+              </div>
+            </div>
+
+            <div x-show="$store.files.selectedTranslationObj?.key != null" class="flex flex-col overflow-auto mt-2 border border-white/50 rounded-xl h-full overflow-hidden">
+              <div class="flex flex-row items-center bg-stone-800 transition border-b border-white/10 focus-within:border-white/50 hover:border-white/40">
+                <button @click="$store.files.closeTranslationKeyView()" class="p-3 mx-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </button>
+                <input type="text" spellcheck="false" x-model="$store.files.selectedTranslationObj.newKey" :value="$store.files.selectedTranslationObj.key" placeholder="Translation key name" class="pr-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
+                <!-- <button class="px-4 py-1.5 mr-1.5 bg-blue-700 text-white rounded-md shadow">
+                  Save
+                </button> -->
+              </div>
+
+              <div x-data="{ newTranslations: {} }" class="flex flex-col overflow-auto">
+                <template x-for="lang in $store.files.getDetectedLanguages()" :key="lang">
+                  <div class="flex flex-row items-center gap-3 px-4 py-1 transition bg-transparent hover:bg-stone-800/80 border-b border-white/10">
+                    <span x-text="lang" class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800"></span>
+                    <input type="text" spellcheck="false" x-model="newTranslations[lang]" :value="_get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')" placeholder="Value for translation" class="pr-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
+                  </div>
                 </template>
               </div>
             </div>

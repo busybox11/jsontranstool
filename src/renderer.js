@@ -44,6 +44,8 @@ const sampleCodeString = `{
 }
 `
 
+window._get = get
+
 monaco.editor.defineTheme('customMonacoTheme', {
   base: 'vs-dark',
   inherit: true,
@@ -72,6 +74,11 @@ Alpine.store('files', {
   everyFileContent: {},
   allTranslationsKeys: [],
   searchTranslationsQuery: '',
+  selectedTranslationObj: {
+    key: null,
+    newKey: null,
+    translations: {}
+  },
 
   shouldShowFilePreview() { return (this.directory == undefined || !this.currentConfig.languageKeyCode) || (this.forceShowConfig || this.selectedFile !== undefined) },
 
@@ -121,6 +128,23 @@ Alpine.store('files', {
     }
   },
 
+  getAllTranslationsForKey(key) {
+    const everyFileContent = this.everyFileContent
+
+    let outTranslations = {}
+
+    for (let file of Object.values(everyFileContent)) {
+      const translation = get(file, `${this.currentConfig.translationStringsJSONPath}.${key}`)
+      const languageCode = get(file, this.currentConfig.languageKeyCode)
+
+      outTranslations[languageCode] = {
+        translation
+      }
+    }
+
+    return outTranslations
+  },
+
   openCustomDirectoryPath(path) {
     let response = PRELOAD_CONTEXT.directoryData(path)
     console.log(response)
@@ -130,6 +154,12 @@ Alpine.store('files', {
     this.files = response.files
     this.regexFiles = this.getSavedRegexForCurrentDirectory() ?? 'translation-[A-Z]{2}.json'
     this.selectedFile = undefined
+    this.searchTranslationsQuery = ''
+    this.selectedTranslationObj = {
+      key: null,
+      newKey: null,
+      translations: {}
+    }
     this.updateCurrentConfig()
 
     this.readEveryFilteredFileInDirectory().then(everyFile => {
@@ -299,6 +329,43 @@ Alpine.store('files', {
 
   get getFilteredTranslationKeys() {
     return this.allTranslationsKeys?.filter(key => key.toLowerCase().includes(this.searchTranslationsQuery.toLowerCase()))
+  },
+
+  createNewTranslation() {
+    let newTranslationKey = this.searchTranslationsQuery ?? ''
+    const everyFileContent = this.everyFileContent
+
+    let translationsEmptyObj = {}
+
+    for (let file of Object.values(everyFileContent)) {
+      const languageCode = get(file, this.currentConfig.languageKeyCode)
+
+      translationsEmptyObj[languageCode] = {
+        translation: ''
+      }
+    }
+
+    this.selectedTranslationObj = {
+      key: '',
+      newKey: newTranslationKey,
+      translations: translationsEmptyObj
+    }
+  },
+
+  showTranslationKey(key) {
+    this.selectedTranslationObj = {
+      key,
+      newKey: key,
+      translations: this.getAllTranslationsForKey(key)
+    }
+  },
+
+  closeTranslationKeyView() {
+    this.selectedTranslationObj = {
+      key: null,
+      newKey: null,
+      translations: {}
+    }
   }
 })
 
