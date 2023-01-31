@@ -4,6 +4,10 @@
 const {ipcRenderer, contextBridge} = require('electron')
 const fs = require('fs')
 
+import { Translator } from "./translations"
+
+let translator
+
 contextBridge.exposeInMainWorld('PRELOAD_CONTEXT', {
   openDialog() {
     return new Promise((resolve, reject) => {
@@ -30,6 +34,22 @@ contextBridge.exposeInMainWorld('PRELOAD_CONTEXT', {
     return new Promise((resolve, reject) => {
       resolve(fs.readFileSync(filePath, 'utf8'))
     })
+  },
+
+  initTranslator(config) {
+    translator = new Translator(JSON.parse(config))
+  },
+
+  async translate(text, targetLang) {
+    if (targetLang.toLowerCase() == 'en') {
+      targetLang = 'en-US'
+    }
+
+    return await translator.translate(text, targetLang)
+  },
+
+  resetTranslator() {
+    translator = undefined
   }
 })
 

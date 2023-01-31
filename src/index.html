@@ -291,8 +291,11 @@
                           <div class="w-auto flex flex-col rounded-lg bg-stone-600 overflow-hidden shadow">
                             <small class="px-3 pt-2 pb-1.5 font-semibold">Fetch translation based on other languages</small>
                             <div class="flex flex-row border-t border-white/30 divide-x divide-white/20 -ml-[1px]">
-                              <template x-for="language in $store.files.getDetectedLanguages()">
-                                <button class="font-mono px-2 py-1 bg-transparent hover:bg-white/20 transition">
+                              <template x-for="language in $store.files.getDetectedLanguages().filter(testLang => testLang !== lang) || []">
+                                <button
+                                 @click="PRELOAD_CONTEXT.translate(_get($store.files.selectedTranslationObj.translations, `${language}.translation`, ''), lang).then((res) => { newTranslations[lang] = res.text; showPopup = false })"
+                                 class="font-mono px-2 py-1 bg-transparent hover:bg-white/20 transition"
+                                >
                                   <span x-text="language"></span>
                                 </button>
                               </template>

@@ -28,9 +28,9 @@
 
 import Alpine from 'alpinejs'
 import './index.css'
-import get from 'lodash/get';
-import union from 'lodash/union';
-import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get'
+import union from 'lodash/union'
+import cloneDeep from 'lodash/cloneDeep'
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
 
@@ -163,6 +163,12 @@ Alpine.store('files', {
       translations: {}
     }
     this.updateCurrentConfig()
+
+    if (this.directory && this.currentConfig.deeplAPIKey) {
+      PRELOAD_CONTEXT.initTranslator(JSON.stringify(this.currentConfig))
+    } else {
+      PRELOAD_CONTEXT.resetTranslator()
+    }
 
     this.readEveryFilteredFileInDirectory().then(everyFile => {
       this.everyFileContent = {...everyFile}
