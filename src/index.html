@@ -257,18 +257,49 @@
                      x-show="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, ''))"
                      class="flex flex-row gap-2 items-center"
                     >
-                      <button
-                       title="Fetch translation based on other languages"
-                       class="group relative h-10 w-10 flex items-center justify-center rounded-full bg-stone-900 hover:bg-stone-800 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-down-circle"><circle cx="12" cy="12" r="10"></circle><polyline points="8 12 12 16 16 12"></polyline><line x1="12" y1="8" x2="12" y2="16"></line></svg>
-                        <div class="group-hover:bg-stone-800 absolute -bottom-1 -left-1 h-6 w-6 flex items-center justify-center rounded-full bg-stone-900 transition">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-globe"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                      <div x-data="{ showPopup: false }" class="relative" @mouseleave="showPopup = false">
+                        <button
+                         title="Fetch translation based on other languages"
+                         @mouseover="showPopup = true"
+                         class="group relative h-10 w-10 flex items-center justify-center rounded-full bg-stone-900 hover:bg-stone-800 transition"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-down-circle"><circle cx="12" cy="12" r="10"></circle><polyline points="8 12 12 16 16 12"></polyline><line x1="12" y1="8" x2="12" y2="16"></line></svg>
+                          <div class="group-hover:bg-stone-800 absolute -bottom-1 -left-1 h-6 w-6 flex items-center justify-center rounded-full bg-stone-900 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-globe"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                          </div>
+                        </button>
+
+                        <div
+                         x-show="showPopup"
+                         x-transition.scale.origin.top.right
+                         class="absolute top-3/4 right-0 px-2 pt-1.5 pb-3 flex flex-col items-end justify-center"
+                        >
+                          <div
+                           class="
+                             w-0 h-0 mr-1.5 rounded-t
+                             border-l-[6px] border-l-transparent
+                             border-b-[8px] border-b-stone-600
+                             border-r-[6px] border-r-transparent
+                             shadow
+                           "
+                          ></div>
+                          <div class="w-auto flex flex-col rounded-lg bg-stone-600 overflow-hidden shadow">
+                            <small class="px-3 pt-2 pb-1.5 font-semibold">Fetch translation based on other languages</small>
+                            <div class="flex flex-row border-t border-white/30 divide-x divide-white/20 -ml-[1px]">
+                              <template x-for="language in $store.files.getDetectedLanguages()">
+                                <button class="font-mono px-2 py-1 bg-transparent hover:bg-white/20 transition">
+                                  <span x-text="language"></span>
+                                </button>
+                              </template>
+                            </div>
+                          </div>
                         </div>
-                      </button>
+                      </div>
 
                       <button
                        title="Fetch other languages based on this translation"
-                       class="group relative h-10 w-10 flex items-center justify-center rounded-full bg-stone-900 hover:bg-stone-800 transition">
+                       class="group relative h-10 w-10 flex items-center justify-center rounded-full bg-stone-900 hover:bg-stone-800 transition"
+                      >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up-circle"><circle cx="12" cy="12" r="10"></circle><polyline points="16 12 12 8 8 12"></polyline><line x1="12" y1="16" x2="12" y2="8"></line></svg>
                         <div class="group-hover:bg-stone-800 absolute -bottom-1 -left-1 h-6 w-6 flex items-center justify-center rounded-full bg-stone-900 transition">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-globe"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
