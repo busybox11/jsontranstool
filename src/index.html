@@ -113,9 +113,21 @@
             <input spellcheck="false" type="text" x-model="$store.files.formConfig.languageKeyCode" placeholder="Key of language code string in JSON (e.g. 'meta.languageCode')" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
           </div>
 
-          <div>
-            <small class="uppercase font-semibold text-white/70">Translations string object <span class="text-red-500">*</span></small>
-            <input spellcheck="false" type="text" x-model="$store.files.formConfig.translationStringsJSONPath" placeholder="Key of translations strings in JSON (e.g. 'strings')" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+          <div class="flex flex-row gap-4">
+            <div class="basis-3/4">
+              <small class="uppercase font-semibold text-white/70">Translations string object <span class="text-red-500">*</span></small>
+              <input spellcheck="false" type="text" x-model="$store.files.formConfig.translationStringsJSONPath" placeholder="Key of translations strings in JSON (e.g. 'strings')" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+            </div>
+
+            <div class="basis-1/4">
+              <label for="config.defaultLanguageSelect" class="uppercase text-xs font-semibold text-white/70 pb-[1px]">Default language</label>
+              <select id="config.defaultLanguageSelect" x-model="$store.files.formConfig.defaultLanguage" :value="$store.files.formConfig?.defaultLanguage" class="px-2 py-1 text-lg w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+                <option value="" :selected="$store.files.formConfig?.defaultLanguage == ''">None</option>
+                <template x-for="language in $store.files.getDetectedLanguages($store.files.formConfig.languageKeyCode)">
+                  <option :value="language" x-text="language ?? 'No target key code set'" :selected="$store.files.formConfig?.defaultLanguage == language"></option>
+                </template>
+              </select>
+            </div>
           </div>
 
           <div>
@@ -146,6 +158,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
               </button>
             </div>
+
             <input spellcheck="false" type="text" x-model="$store.files.formConfig.outputDuplicateFileNameStructure" placeholder="Output file names (empty is the same as original)" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 outline-none mt-3"7>
             <small class="text-sm text-white/60">Available variables: {languageCode}, {oldFileName}</small>
           </div>
@@ -229,9 +242,34 @@
 
               <div x-data="{ newTranslations: {} }" class="flex flex-col overflow-auto">
                 <template x-for="lang in $store.files.getDetectedLanguages()" :key="lang">
-                  <div class="flex flex-row items-center gap-3 px-4 py-1 transition bg-transparent hover:bg-stone-800/80 border-b border-white/10">
-                    <span x-text="lang" class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800"></span>
+                  <div
+                   class="flex flex-row items-center gap-3 px-4 py-1 transition border-b border-white/10"
+                   :class="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')) ? 'hover:bg-stone-700 bg-stone-800' : 'bg-transparent hover:bg-stone-800/80'"
+                  >
+                    <span
+                     x-text="lang"
+                     class="text-sm font-semibold font-mono text-white/70 px-3 py-1 rounded-full"
+                     :class="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')) ? 'bg-stone-600' : 'bg-stone-800'"
+                    ></span>
                     <input type="text" spellcheck="false" x-model="newTranslations[lang]" :value="_get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')" placeholder="Value for translation" class="pr-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
+
+                    <div
+                     x-show="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, ''))"
+                     class="flex flex-row gap-2 items-center"
+                    >
+                      <button
+                       @click="newTranslations[lang] = _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')"
+                       class="h-10 w-10 rounded-full flex items-center justify-center bg-transparent hover:bg-white/20 transition"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rotate-ccw"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                      </button>
+
+                      <button
+                       class="h-10 w-10 rounded-full flex items-center justify-center bg-transparent hover:bg-white/20 transition"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                      </button>
+                    </div>
                   </div>
                 </template>
               </div>

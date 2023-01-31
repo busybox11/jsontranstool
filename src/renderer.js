@@ -65,6 +65,7 @@ Alpine.store('files', {
   formConfig: {
     translationStringsJSONPath: '',
     languageKeyCode: '',
+    defaultLanguage: '',
     bypasses: [],
     directoryPathTargetOutputDuplicate: '',
     outputDuplicateFileNameStructure: ''
@@ -321,9 +322,9 @@ Alpine.store('files', {
     }
   },
 
-  getDetectedLanguages() {
+  getDetectedLanguages(targetKeyCodePath = undefined) {
     return Object.keys(this.everyFileContent).map((file) => {
-      return get(this.everyFileContent[file], this.currentConfig.languageKeyCode)
+      return get(this.everyFileContent[file], targetKeyCodePath ?? this.currentConfig.languageKeyCode, file)
     })
   },
 
