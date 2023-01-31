@@ -109,6 +109,11 @@
           <h2 class="text-2xl font-semibold">Initial configuration</h2>
 
           <div>
+            <small class="uppercase font-semibold text-white/70">DeepL API key <span class="text-red-500">*</span></small>
+            <input spellcheck="false" type="text" x-model="$store.files.formConfig.deeplAPIKey" placeholder="UUID-like API key" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+          </div>
+
+          <div>
             <small class="uppercase font-semibold text-white/70">Language code <span class="text-red-500">*</span></small>
             <input spellcheck="false" type="text" x-model="$store.files.formConfig.languageKeyCode" placeholder="Key of language code string in JSON (e.g. 'meta.languageCode')" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
           </div>
@@ -191,7 +196,7 @@
                 </div>
               </template>
 
-              <small x-show="$store.files.currentConfig.bypasses?.length == 0" class="text-sm text-white/60 italic">No configured assignments</small>
+              <small x-show="$store.files.currentConfig.bypasses?.length == 0" class="text-sm text-white/60 italic">No references configured</small>
             </div>
           </div>
 

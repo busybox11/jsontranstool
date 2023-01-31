@@ -63,6 +63,7 @@ Alpine.store('files', {
   regexFiles: 'translation-[A-Z]{2}.json',
   selectedFile: undefined,
   formConfig: {
+    deeplAPIKey: '',
     translationStringsJSONPath: '',
     languageKeyCode: '',
     defaultLanguage: '',
@@ -262,7 +263,7 @@ Alpine.store('files', {
   async saveDirectoryConf() {
     const config = cloneDeep(this.formConfig)
 
-    if (config.translationStringsJSONPath && config.languageKeyCode) {
+    if (config.deeplAPIKey && config.translationStringsJSONPath && config.languageKeyCode) {
       if (!config.outputDuplicateFileNameStructure || (config.directoryPathTargetOutputDuplicate && config.outputDuplicateFileNameStructure.includes('{languageCode}'))) {
         let everyFile = await this.readEveryFilteredFileInDirectory()
         this.everyFileContent = cloneDeep(everyFile)
