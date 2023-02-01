@@ -45,7 +45,15 @@ contextBridge.exposeInMainWorld('PRELOAD_CONTEXT', {
       targetLang = 'en-US'
     }
 
-    return await translator.translate(text, targetLang)
+    if (targetLang.toLowerCase() == 'pt') {
+      targetLang = 'pt-PT'
+    }
+
+    try {
+      return await translator.translate(text, targetLang)
+    } catch (e) {
+      throw e
+    }
   },
 
   resetTranslator() {

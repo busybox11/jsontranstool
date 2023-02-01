@@ -374,6 +374,48 @@ Alpine.store('files', {
       newKey: null,
       translations: {}
     }
+  },
+
+  async fillTranslationsFromSelectedTranslation(translationsObj, languageCode) {
+    const allLanguages = this.getDetectedLanguages()
+    let fetchedTranslations = {}
+
+    // Get original translations for the selected key
+    const originalTranslations = this.getAllTranslationsForKey(this.selectedTranslationObj.key)
+
+    const targetTranslationString = translationsObj[languageCode] || originalTranslations[languageCode].translation
+
+    // Get all translations for the selected language
+    for (let language of allLanguages) {
+      if (language !== languageCode) {
+        let resultString
+        let resultLanguageCode = language
+
+        // Handle blocking bypasses
+        const bypass = this.currentConfig.bypasses.find(bypass => bypass.target === languageCode && bypass.source === language)
+        if (bypass) {
+          resultLanguageCode = bypass.source
+        }
+
+        if (fetchedTranslations[resultLanguageCode]) {
+          resultString = fetchedTranslations[resultLanguageCode]
+        } else {
+          try {
+            await PRELOAD_CONTEXT.translate(targetTranslationString, language).then((response) => {
+              resultString = response.text
+              fetchedTranslations[resultLanguageCode] = resultString
+            })
+          } catch (e) {
+            // TODO: Handle "Bad request, message: Value for 'target_lang' not supported."
+            console.log(e.message)
+          }
+        }
+
+        if (resultString) {
+          translationsObj[language] = resultString
+        }
+      }
+    }
   }
 })
 

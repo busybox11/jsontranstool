@@ -234,9 +234,9 @@
               </div>
             </div>
 
-            <div x-show="$store.files.selectedTranslationObj?.key != null" class="flex flex-col overflow-auto mt-2 border border-white/50 rounded-xl h-full overflow-hidden">
+            <div x-data="{ newTranslations: {} }" x-show="$store.files.selectedTranslationObj?.key != null" class="flex flex-col overflow-auto mt-2 border border-white/50 rounded-xl h-full overflow-hidden">
               <div class="flex flex-row items-center bg-stone-800 transition border-b border-white/10 focus-within:border-white/50 hover:border-white/40">
-                <button @click="$store.files.closeTranslationKeyView()" class="p-3 mx-1">
+                <button @click="$store.files.closeTranslationKeyView(); newTranslations = {}" class="p-3 mx-1">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 </button>
                 <input type="text" spellcheck="false" x-model="$store.files.selectedTranslationObj.newKey" :value="$store.files.selectedTranslationObj.key" placeholder="Translation key name" class="pr-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
@@ -245,7 +245,7 @@
                 </button> -->
               </div>
 
-              <div x-data="{ newTranslations: {} }" class="flex flex-col overflow-auto">
+              <div class="flex flex-col overflow-auto">
                 <template x-for="lang in $store.files.getDetectedLanguages()" :key="lang">
                   <div
                    class="flex flex-row items-center gap-3 px-4 py-1 transition border-b border-white/10"
@@ -259,7 +259,6 @@
                     <input type="text" spellcheck="false" x-model="newTranslations[lang]" :value="_get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')" placeholder="Value for translation" class="pr-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
 
                     <div
-                     x-show="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, ''))"
                      class="flex flex-row gap-2 items-center"
                     >
                       <div x-data="{ showPopup: false }" class="relative" @mouseleave="showPopup = false">
@@ -277,7 +276,7 @@
                         <div
                          x-show="showPopup"
                          x-transition.scale.origin.top.right
-                         class="absolute top-3/4 right-0 px-2 pt-1.5 pb-3 flex flex-col items-end justify-center"
+                         class="absolute top-3/4 right-0 px-2 pt-1.5 pb-3 flex flex-col items-end justify-center z-20"
                         >
                           <div
                            class="
@@ -306,6 +305,7 @@
 
                       <button
                        title="Fetch other languages based on this translation"
+                       @click="await $store.files.fillTranslationsFromSelectedTranslation(newTranslations, lang)"
                        class="group relative h-10 w-10 flex items-center justify-center rounded-full bg-stone-900 hover:bg-stone-800 transition"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up-circle"><circle cx="12" cy="12" r="10"></circle><polyline points="16 12 12 8 8 12"></polyline><line x1="12" y1="16" x2="12" y2="8"></line></svg>
@@ -317,6 +317,7 @@
                       <button
                        title="Reset edited translation"
                        @click="newTranslations[lang] = _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')"
+                       x-show="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, ''))"
                        class="h-10 w-10 rounded-full flex items-center justify-center bg-stone-900 hover:bg-stone-800 transition"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rotate-ccw"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
@@ -324,6 +325,7 @@
 
                       <button
                        title="Save edited translation"
+                       x-show="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, ''))"
                        class="h-10 w-10 rounded-full flex items-center justify-center bg-stone-900 hover:bg-stone-800 transition"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
