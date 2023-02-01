@@ -118,6 +118,12 @@ Alpine.store('files', {
     let paths = store.get('paths', {})
     let pathData = paths[this.directory] || {}
     this.currentConfig = pathData
+
+    if (this.directory && this.currentConfig.deeplAPIKey) {
+      PRELOAD_CONTEXT.initTranslator(JSON.stringify(this.currentConfig))
+    } else {
+      PRELOAD_CONTEXT.resetTranslator()
+    }
   },
 
   updateTranslationsKeys() {
@@ -377,6 +383,11 @@ Alpine.store('files', {
   },
 
   async fillTranslationsFromSelectedTranslation(translationsObj, languageCode) {
+    if (!this.currentConfig.deeplAPIKey) {
+      alert('Please enter a DeepL API key in the config.')
+      return
+    }
+
     const allLanguages = this.getDetectedLanguages()
     let fetchedTranslations = {}
 
@@ -392,7 +403,7 @@ Alpine.store('files', {
         let resultLanguageCode = language
 
         // Handle blocking bypasses
-        const bypass = this.currentConfig.bypasses.find(bypass => bypass.target === languageCode && bypass.source === language)
+        const bypass = Object.values(this.currentConfig.bypasses).find(bypass => bypass.target === language)
         if (bypass) {
           resultLanguageCode = bypass.source
         }
@@ -406,6 +417,7 @@ Alpine.store('files', {
               fetchedTranslations[resultLanguageCode] = resultString
             })
           } catch (e) {
+
             // TODO: Handle "Bad request, message: Value for 'target_lang' not supported."
             console.log(e.message)
           }
