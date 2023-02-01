@@ -34,16 +34,6 @@ import cloneDeep from 'lodash/cloneDeep'
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
 
-const sampleCodeString = `{
-  "languageCode": "EN",
-  "languageName": "English",
-  "strings": {
-    "hello": "Hello World!",
-    ...
-  }
-}
-`
-
 window._get = get
 
 monaco.editor.defineTheme('customMonacoTheme', {
