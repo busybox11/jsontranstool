@@ -36,6 +36,12 @@ contextBridge.exposeInMainWorld('PRELOAD_CONTEXT', {
     })
   },
 
+  writeFile(filePath, content) {
+    return new Promise((resolve, reject) => {
+      resolve(fs.writeFileSync(filePath, content, { encoding:'utf8', flag:'w' }))
+    })
+  },
+
   initTranslator(config) {
     translator = new Translator(JSON.parse(config))
   },

@@ -29,12 +29,14 @@
 import Alpine from 'alpinejs'
 import './index.css'
 import get from 'lodash/get'
+import set from 'lodash/set'
 import union from 'lodash/union'
 import cloneDeep from 'lodash/cloneDeep'
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
 
 window._get = get
+window._set = set
 
 monaco.editor.defineTheme('customMonacoTheme', {
   base: 'vs-dark',
@@ -365,6 +367,11 @@ Alpine.store('files', {
   },
 
   closeTranslationKeyView() {
+    this.readEveryFilteredFileInDirectory().then(everyFile => {
+      this.everyFileContent = {...everyFile}
+      this.updateTranslationsKeys()
+    })
+
     this.selectedTranslationObj = {
       key: null,
       newKey: null,
@@ -415,6 +422,41 @@ Alpine.store('files', {
 
         if (resultString) {
           translationsObj[language] = resultString
+        }
+      }
+    }
+  },
+  
+  saveTranslations(translationsObj, languageCode = undefined) {
+    // Save translations for all languages or only for one language
+    // if the languageCode parameter is set
+
+    const selectedTranslationKey = this.selectedTranslationObj.key
+
+    if (selectedTranslationKey) {
+      const newKey = this.selectedTranslationObj.newKey
+
+      if (newKey !== selectedTranslationKey) {
+        // Rename translation key
+        // this.renameTranslationKey(selectedTranslationKey, newKey)
+      }
+
+      const baseDirectory = this.directory
+
+      // TODO: Integrate duplicate output folder
+      for (let [fileName, file] of Object.entries(this.everyFileContent)) {
+        const languageKey = get(file, this.currentConfig.languageKeyCode)
+
+        if (!languageCode || languageCode === languageKey) {
+          const translationObj = get(file, this.currentConfig.translationStringsJSONPath)
+
+          if (translationObj) {
+            set(translationObj, selectedTranslationKey, translationsObj[languageKey])
+
+            this.selectedTranslationObj.translations[languageKey].translation = translationsObj[languageKey]
+
+            PRELOAD_CONTEXT.writeFile(`${baseDirectory}/${fileName}`, JSON.stringify(file, null, 2))
+          }
         }
       }
     }

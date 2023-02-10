@@ -9,7 +9,8 @@ export class Translator {
     let translateResult = await this.deepl.translateText(
       text,
       null,
-      targetLang
+      targetLang,
+      { preserveFormatting: true }
     )
 
     return translateResult

@@ -234,7 +234,7 @@
               </div>
             </div>
 
-            <div x-show="$store.files.selectedTranslationObj?.key != null" class="flex flex-col overflow-auto mt-2 border border-white/50 rounded-xl h-full overflow-hidden">
+            <div x-show="$store.files.selectedTranslationObj?.key != null" class="flex flex-col mt-2 border border-white/50 rounded-xl h-full overflow-hidden">
               <div class="flex flex-row items-center bg-stone-800 transition border-b border-white/10 focus-within:border-white/50 hover:border-white/40">
                 <button @click="$store.files.closeTranslationKeyView(); newTranslations = {}" class="p-3 mx-1">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
@@ -325,6 +325,7 @@
 
                       <button
                        title="Save edited translation"
+                       @click="$store.files.saveTranslations(newTranslations, lang)"
                        x-show="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, ''))"
                        class="h-10 w-10 rounded-full flex items-center justify-center bg-stone-900 hover:bg-stone-800 transition"
                       >
