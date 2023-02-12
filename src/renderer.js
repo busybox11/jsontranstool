@@ -426,6 +426,18 @@ Alpine.store('files', {
       }
     }
   },
+
+  haveTranslationsChanged(translationsObj) {
+    const originalTranslations = this.getAllTranslationsForKey(this.selectedTranslationObj.key)
+
+    for (let [languageKey, newTranslationStr] of Object.entries(translationsObj)) {
+      const originalTranslationStr = originalTranslations[languageKey].translation
+      
+      if (newTranslationStr !== originalTranslationStr) {
+        return true
+      }
+    }
+  },
   
   saveTranslations(translationsObj, languageCode = undefined) {
     // Save translations for all languages or only for one language
@@ -450,7 +462,7 @@ Alpine.store('files', {
         if (!languageCode || languageCode === languageKey) {
           const translationObj = get(file, this.currentConfig.translationStringsJSONPath)
 
-          if (translationObj) {
+          if (translationObj && translationsObj[languageKey]) {
             set(translationObj, selectedTranslationKey, translationsObj[languageKey])
 
             this.selectedTranslationObj.translations[languageKey].translation = translationsObj[languageKey]
