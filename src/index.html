@@ -242,7 +242,10 @@
                 <input type="text" spellcheck="false" x-model="$store.files.selectedTranslationObj.newKey" :value="$store.files.selectedTranslationObj.key" placeholder="Translation key name" class="pr-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
                 <button
                   @click="$store.files.saveTranslations(newTranslations)"
-                  x-show="$store.files.haveTranslationsChanged(newTranslations) && ($store.files.selectedTranslationObj.newKey.trim() !== '' || $store.files.selectedTranslationObj.key.trim() !== '')"
+                  x-show="
+                    ($store.files.haveTranslationsChanged(newTranslations) && ($store.files.selectedTranslationObj.newKey?.trim() !== '' || $store.files.selectedTranslationObj.key?.trim() !== '')
+                    || ($store.files.selectedTranslationObj.newKey?.trim() !== '' && $store.files.selectedTranslationObj.key !== $store.files.selectedTranslationObj.newKey))
+                  "
                   class="px-4 py-1.5 mr-1.5 bg-blue-700 text-white rounded-md shadow"
                 >
                   Save

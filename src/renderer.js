@@ -119,6 +119,8 @@ Alpine.store('files', {
   },
 
   updateTranslationsKeys() {
+    this.allTranslationsKeys = []
+
     if (this.currentConfig.translationStringsJSONPath) {
       const everyFileContent = this.everyFileContent
 
@@ -444,32 +446,49 @@ Alpine.store('files', {
     // if the languageCode parameter is set
 
     const selectedTranslationKey = this.selectedTranslationObj.key
+    const selectedTranslationNewKey = this.selectedTranslationObj.newKey
 
-    if (selectedTranslationKey) {
-      const newKey = this.selectedTranslationObj.newKey
-
-      if (newKey !== selectedTranslationKey) {
-        // Rename translation key
-        // this.renameTranslationKey(selectedTranslationKey, newKey)
-      }
-
+    if (selectedTranslationKey || selectedTranslationNewKey) {
       const baseDirectory = this.directory
 
       // TODO: Integrate duplicate output folder
       for (let [fileName, file] of Object.entries(this.everyFileContent)) {
         const languageKey = get(file, this.currentConfig.languageKeyCode)
 
-        if (!languageCode || languageCode === languageKey) {
-          const translationObj = get(file, this.currentConfig.translationStringsJSONPath)
+        if (!languageCode || languageCode === languageKey || selectedTranslationNewKey !== selectedTranslationKey) {
+          let translationObj = get(file, this.currentConfig.translationStringsJSONPath)
 
-          if (translationObj && translationsObj[languageKey]) {
-            set(translationObj, selectedTranslationKey, translationsObj[languageKey])
-
-            this.selectedTranslationObj.translations[languageKey].translation = translationsObj[languageKey]
-
-            PRELOAD_CONTEXT.writeFile(`${baseDirectory}/${fileName}`, JSON.stringify(file, null, 2))
+          if (translationObj && translationsObj[languageKey] || selectedTranslationNewKey !== selectedTranslationKey) {
+            set(translationObj, selectedTranslationKey, translationsObj[languageKey] ?? translationObj[selectedTranslationKey])
           }
+
+          if (selectedTranslationNewKey !== selectedTranslationKey) {
+            translationObj = {
+              ...translationObj,
+              [selectedTranslationNewKey]: translationObj[selectedTranslationKey]
+            }
+
+            delete translationObj[selectedTranslationKey]
+          }
+
+          // Sort translationObj keys
+          translationObj = Object.keys(translationObj).sort().reduce((obj, key) => {
+            obj[key] = translationObj[key]
+            return obj
+          }, {})
+
+          set(file, this.currentConfig.translationStringsJSONPath, translationObj)
+
+          this.selectedTranslationObj.translations[languageKey].translation = translationsObj[languageKey]
+
+          PRELOAD_CONTEXT.writeFile(`${baseDirectory}/${fileName}`, JSON.stringify(file, null, 2))
         }
+      }
+
+      if (selectedTranslationNewKey) {
+        this.selectedTranslationObj.key = selectedTranslationNewKey
+        this.updateTranslationsKeys()
+        this.showTranslationKey(selectedTranslationNewKey)
       }
     }
   }
