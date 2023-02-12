@@ -409,7 +409,7 @@ Alpine.store('files', {
           resultString = fetchedTranslations[resultLanguageCode]
         } else {
           try {
-            await PRELOAD_CONTEXT.translate(targetTranslationString, language).then((response) => {
+            await PRELOAD_CONTEXT.translate(targetTranslationString, resultLanguageCode).then((response) => {
               resultString = response.text
               fetchedTranslations[resultLanguageCode] = resultString
             })
