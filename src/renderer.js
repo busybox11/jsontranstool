@@ -485,6 +485,23 @@ Alpine.store('files', {
         }
       }
 
+      // Handle automatic duplicate output folder update
+      // Copy all files from the output folder to the duplicate output folder
+      // even if there are no changes
+      
+      if (this.currentConfig.directoryPathTargetOutputDuplicate) {
+        const duplicateOutputFolder = this.currentConfig.directoryPathTargetOutputDuplicate
+        const duplicateOutputFileNameStructure = this.currentConfig.outputDuplicateFileNameStructure
+
+        for (let [fileName, file] of Object.entries(this.everyFileContent)) {
+          const languageKey = get(file, this.currentConfig.languageKeyCode)
+          const newFileName = duplicateOutputFileNameStructure.replace('{languageCode}', languageKey)
+                                                              .replace('{oldFileName}', fileName)
+
+          PRELOAD_CONTEXT.writeFile(`${duplicateOutputFolder}/${newFileName}`, JSON.stringify(file, null, 2))
+        }
+      }
+
       if (selectedTranslationNewKey) {
         this.selectedTranslationObj.key = selectedTranslationNewKey
         this.updateTranslationsKeys()
