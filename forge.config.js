@@ -1,11 +1,14 @@
 module.exports = {
-  packagerConfig: {},
+  packagerConfig: {
+    // Options for architecture
+    arch: ['x64', 'arm64'],
+  },
   rebuildConfig: {},
   makers: [
-    {
+    /* {
       name: '@electron-forge/maker-squirrel',
       config: {},
-    },
+    }, */
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin'],
@@ -14,10 +17,10 @@ module.exports = {
       name: '@electron-forge/maker-deb',
       config: {},
     },
-    {
+    /* {
       name: '@electron-forge/maker-rpm',
       config: {},
-    },
+    }, */
   ],
   plugins: [
     {
