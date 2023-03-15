@@ -1,26 +1,48 @@
 module.exports = {
   packagerConfig: {
-    // Options for architecture
+    icon: "files/icon.ico",
+    ignore: "(tests*|.github*)",
     arch: ['x64', 'arm64'],
   },
-  rebuildConfig: {},
+  electronPackagerConfig: {
+    packageName: "jsontranstool",
+    name: "jsontranstool",
+    productName: "jsontranstool",
+    CompanyName: "busybox11"
+  },
   makers: [
-    /* {
-      name: '@electron-forge/maker-squirrel',
-      config: {},
-    }, */
     {
-      name: '@electron-forge/maker-zip',
-      platforms: ['darwin'],
+      name: "@electron-forge/maker-squirrel",
+      config: {
+        name: "autodoms",
+        exe: "jsontranstool.exe",
+        setupExe: "jsontranstool.setup.exe"
+      }
     },
     {
-      name: '@electron-forge/maker-deb',
-      config: {},
+      name: "@electron-forge/maker-zip",
+      platforms: [
+        "darwin"
+      ]
     },
-    /* {
-      name: '@electron-forge/maker-rpm',
-      config: {},
-    }, */
+    {
+      name: "@electron-forge/maker-deb",
+      config: {}
+    }
+  ],
+  publishers: [
+    {
+      name: "@electron-forge/publisher-github",
+      platforms: [
+        "win32"
+      ],
+      config: {
+        repository: {
+          owner: "busybox11",
+          name: "jsontranstool"
+        }
+      }
+    }
   ],
   plugins: [
     {
