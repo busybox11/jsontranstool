@@ -1,12 +1,31 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
-const {ipcRenderer, contextBridge} = require('electron')
+const { ipcRenderer, contextBridge } = require('electron')
 const fs = require('fs')
+const git = require('simple-git')
 
 import { Translator } from "./translations"
 
 let translator
+let trackedGitRepos = []
+
+const gitStatus = () => {
+  // Get git branches
+  trackedGitRepos.forEach((repoPath) => {
+    git(repoPath).branch((err, branchSummary) => {
+      if (err) {
+        console.warn(err)
+      } else {
+        window.postMessage({
+          type: 'gitBranches',
+          status: branchSummary,
+          repoPath
+        }, '*')
+      }
+    })
+  });
+}
 
 contextBridge.exposeInMainWorld('PRELOAD_CONTEXT', {
   openDialog() {
@@ -19,7 +38,27 @@ contextBridge.exposeInMainWorld('PRELOAD_CONTEXT', {
     })
   },
 
+  gitStatus() {
+    gitStatus()
+  },
+
+  trackGitRepo(path) {
+    trackedGitRepos.push(path)
+    gitStatus()
+  },
+
   directoryData(path) {
+    try {
+      if (path == undefined) {
+        trackedGitRepos = []
+      } else {
+        trackedGitRepos.push(path)
+        gitStatus()
+      }
+    } catch (e) {
+      console.warn(e)
+    }
+
     return {
       directory: path,
       files: (!path)
@@ -33,12 +72,16 @@ contextBridge.exposeInMainWorld('PRELOAD_CONTEXT', {
   readFile(filePath) {
     return new Promise((resolve, reject) => {
       resolve(fs.readFileSync(filePath, 'utf8'))
+
+      gitStatus()
     })
   },
 
   writeFile(filePath, content) {
     return new Promise((resolve, reject) => {
-      resolve(fs.writeFileSync(filePath, content, { encoding:'utf8', flag:'w' }))
+      resolve(fs.writeFileSync(filePath, content, { encoding: 'utf8', flag: 'w' }))
+
+      gitStatus()
     })
   },
 

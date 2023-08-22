@@ -41,7 +41,8 @@
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.1.0",
     "lodash": "^4.17.21",
-    "monaco-editor-webpack-plugin": "^7.0.1"
+    "monaco-editor-webpack-plugin": "^7.0.1",
+    "simple-git": "^3.19.1"
   },
   "repository": {
     "type": "git",

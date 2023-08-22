@@ -34,6 +34,8 @@ import union from 'lodash/union'
 import cloneDeep from 'lodash/cloneDeep'
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
+import 'monaco-editor/esm/vs/language/json/monaco.contribution'
+import 'monaco-editor/esm/vs/editor/contrib/find/browser/findController'
 
 window._get = get
 window._set = set
@@ -41,7 +43,15 @@ window._set = set
 monaco.editor.defineTheme('customMonacoTheme', {
   base: 'vs-dark',
   inherit: true,
-  rules: [],
+  rules: [
+    { token: "operator", foreground: "ff0000" },
+    { token: "identifier", foreground: "3b8e23" },
+    { token: "symbol", foreground: "327a1f" },
+    { token: "type.identifier", foreground: "1459a9" },
+    { token: "number", foreground: "b1871b" },
+    { token: "string", foreground: "c225ca" },
+    { token: "comment", foreground: "73c0e2" },
+  ],
   colors: {
     'editor.background': '#100f0e00'
   }
@@ -73,6 +83,25 @@ Alpine.store('files', {
     newKey: null,
     translations: {}
   },
+  gitBranches: {},
+  differentBranches: false,
+
+  init() {
+    window.addEventListener('message', (event) => {
+      const message = event.data
+
+      if (message.type === 'gitBranches') {
+        this.gitBranches[message.repoPath] = message.status
+
+        if (Object.keys(this.gitBranches).length > 1) {
+          // If not all branches are the same, set differentBranches to true
+          this.differentBranches = !Object.values(this.gitBranches).every((branch) => branch.current === Object.values(this.gitBranches)[0].current)
+        } else {
+          this.differentBranches = false
+        }
+      }
+    })
+  },
 
   shouldShowFilePreview() { return (this.directory == undefined || !this.currentConfig.languageKeyCode) || (this.forceShowConfig || this.selectedFile !== undefined) },
 
@@ -91,13 +120,13 @@ Alpine.store('files', {
 
   getFilteredFiles() {
     return this.files
-                  .filter(file => file.match(new RegExp(this.regexFiles)))
-                  .map(file => {
-                    return {
-                      name: file,
-                      type: file.split('.').pop().toLowerCase()
-                    }
-                  })
+      .filter(file => file.match(new RegExp(this.regexFiles)))
+      .map(file => {
+        return {
+          name: file,
+          type: file.split('.').pop().toLowerCase()
+        }
+      })
   },
 
   getSavedRegexForCurrentDirectory() {
@@ -115,6 +144,10 @@ Alpine.store('files', {
       PRELOAD_CONTEXT.initTranslator(JSON.stringify(this.currentConfig))
     } else {
       PRELOAD_CONTEXT.resetTranslator()
+    }
+
+    if (pathData.directoryPathTargetOutputDuplicate) {
+      PRELOAD_CONTEXT.trackGitRepo(pathData.directoryPathTargetOutputDuplicate)
     }
   },
 
@@ -148,8 +181,10 @@ Alpine.store('files', {
   },
 
   openCustomDirectoryPath(path) {
+    this.gitBranches = {}
+    this.differentBranches = false
+
     let response = PRELOAD_CONTEXT.directoryData(path)
-    console.log(response)
     this.forceShowConfig = false
     this.everyFileContent = {}
     this.directory = response.directory
@@ -171,7 +206,7 @@ Alpine.store('files', {
     }
 
     this.readEveryFilteredFileInDirectory().then(everyFile => {
-      this.everyFileContent = {...everyFile}
+      this.everyFileContent = { ...everyFile }
       this.updateTranslationsKeys()
     })
 
@@ -215,7 +250,8 @@ Alpine.store('files', {
             language: 'json',
             theme: 'customMonacoTheme',
             automaticLayout: true,
-            fixedOverflowWidgets: true
+            fixedOverflowWidgets: true,
+            readOnly: true
           })
         } else {
           monaco.editor.getModels()[0].setValue(content)
@@ -261,7 +297,7 @@ Alpine.store('files', {
 
   toggleShowConfig() {
     if (this.currentConfig.languageKeyCode) {
-      this.formConfig = {...this.currentConfig}
+      this.formConfig = { ...this.currentConfig }
       this.forceShowConfig = !this.forceShowConfig
     }
   },
@@ -370,7 +406,7 @@ Alpine.store('files', {
 
   closeTranslationKeyView() {
     this.readEveryFilteredFileInDirectory().then(everyFile => {
-      this.everyFileContent = {...everyFile}
+      this.everyFileContent = { ...everyFile }
       this.updateTranslationsKeys()
     })
 
@@ -434,13 +470,13 @@ Alpine.store('files', {
 
     for (let [languageKey, newTranslationStr] of Object.entries(translationsObj)) {
       const originalTranslationStr = originalTranslations[languageKey].translation
-      
+
       if (newTranslationStr !== originalTranslationStr) {
         return true
       }
     }
   },
-  
+
   saveTranslations(translationsObj, languageCode = undefined) {
     // Save translations for all languages or only for one language
     // if the languageCode parameter is set
@@ -488,7 +524,7 @@ Alpine.store('files', {
       // Handle automatic duplicate output folder update
       // Copy all files from the output folder to the duplicate output folder
       // even if there are no changes
-      
+
       if (this.currentConfig.directoryPathTargetOutputDuplicate) {
         const duplicateOutputFolder = this.currentConfig.directoryPathTargetOutputDuplicate
         const duplicateOutputFileNameStructure = this.currentConfig.outputDuplicateFileNameStructure
@@ -496,7 +532,7 @@ Alpine.store('files', {
         for (let [fileName, file] of Object.entries(this.everyFileContent)) {
           const languageKey = get(file, this.currentConfig.languageKeyCode)
           const newFileName = duplicateOutputFileNameStructure.replace('{languageCode}', languageKey)
-                                                              .replace('{oldFileName}', fileName)
+            .replace('{oldFileName}', fileName)
 
           PRELOAD_CONTEXT.writeFile(`${duplicateOutputFolder}/${newFileName}`, JSON.stringify(file, null, 2))
         }

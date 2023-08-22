@@ -1,351 +1,582 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>jsontranstool</title>
 
-  </head>
-  <body x-data class="h-screen flex flex-row bg-stone-900 text-white overflow-hidden">
-    <!-- Sidebar -->
-    <div class="flex flex-col flex-initial w-96 flex-shrink-0">
-      <div class="flex flex-col h-full bg-stone-800 p-6 overflow-auto relative">
-        <!-- Open folder button -->
-        <button @click="$store.files.openFolder()" class="sticky top-0 px-6 py-4 transition bg-stone-700 border-2 border-stone-500 hover:border-stone-400 hover:shadow-lg focus:border-stone-300 rounded-2xl w-full flex flex-row items-center gap-4 outline-none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-          <span>Open Folder</span>
-        </button>
+<head>
+  <meta charset="UTF-8" />
+  <title>jsontranstool</title>
 
-        <!-- File list -->
-        <div class="flex flex-col h-full">
-          <div x-show="!$store.files.directory" class="-mx-6">
-            <template x-for="directory in $store.files.getKnownDirectories()" :key="directory.fullPath" class="flex flex-row items-center gap-4 mt-4">
-              <button @click="$store.files.openCustomDirectoryPath(directory.fullPath)" class="w-full max-w-full flex flex-row items-center gap-4 py-2 hover:bg-white/10 focus:bg-white/10 cursor-pointer px-6 outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save flex-shrink-0"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                <div class="flex flex-col truncate w-full text-left leading-4">
-                  <span x-text="directory.dirName" class="truncate py-0.5"></span>
-                  <small x-text="directory.dirPath" class="text-xs truncate"></small>
-                </div>
-              </button>
-            </template>
-          </div>
+</head>
 
-          <template x-data="{ knownFileTypes: ['json', 'js', 'css'] }" x-for="file in $store.files.getFilteredFiles()" :key="file.name" class="flex flex-row items-center gap-4 mt-4">
-            <button @click="$store.files.previewFile(file.name)" class="flex flex-row items-center gap-4 py-2 hover:bg-white/10 focus:bg-white/10 cursor-pointer -mx-6 px-6 outline-none" :class="{ 'bg-white/5': $store.files.selectedFile?.file == file.name }">
-              <!-- File icons -->
-              <svg x-show="!knownFileTypes.includes(file.type)" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text flex-shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-              <svg x-show="file.type == 'json'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" focusable="false" aria-hidden="true" fill="#ffe400" viewBox="0 0 24 24" data-testid="DataObjectIcon"><path d="M4 7v2c0 .55-.45 1-1 1H2v4h1c.55 0 1 .45 1 1v2c0 1.65 1.35 3 3 3h3v-2H7c-.55 0-1-.45-1-1v-2c0-1.3-.84-2.42-2-2.83v-.34C5.16 11.42 6 10.3 6 9V7c0-.55.45-1 1-1h3V4H7C5.35 4 4 5.35 4 7zm17 3c-.55 0-1-.45-1-1V7c0-1.65-1.35-3-3-3h-3v2h3c.55 0 1 .45 1 1v2c0 1.3.84 2.42 2 2.83v.34c-1.16.41-2 1.52-2 2.83v2c0 .55-.45 1-1 1h-3v2h3c1.65 0 3-1.35 3-3v-2c0-.55.45-1 1-1h1v-4h-1z"></path></svg>
-              <svg x-show="file.type == 'js'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 630 630" width="24" height="24">
-                <rect width="630" height="630" fill="#f7df1e"/>
-                <path d="m423.2 492.19c12.69 20.72 29.2 35.95 58.4 35.95 24.53 0 40.2-12.26 40.2-29.2 0-20.3-16.1-27.49-43.1-39.3l-14.8-6.35c-42.72-18.2-71.1-41-71.1-89.2 0-44.4 33.83-78.2 86.7-78.2 37.64 0 64.7 13.1 84.2 47.4l-46.1 29.6c-10.15-18.2-21.1-25.37-38.1-25.37-17.34 0-28.33 11-28.33 25.37 0 17.76 11 24.95 36.4 35.95l14.8 6.34c50.3 21.57 78.7 43.56 78.7 93 0 53.3-41.87 82.5-98.1 82.5-54.98 0-90.5-26.2-107.88-60.54zm-209.13 5.13c9.3 16.5 17.76 30.45 38.1 30.45 19.45 0 31.72-7.61 31.72-37.2v-201.3h59.2v202.1c0 61.3-35.94 89.2-88.4 89.2-47.4 0-74.85-24.53-88.81-54.075z"/>
+<body x-data class="h-screen flex flex-row bg-stone-900 text-white overflow-hidden">
+  <!-- Sidebar -->
+  <div class="flex flex-col flex-initial w-96 flex-shrink-0">
+    <div class="flex flex-col h-full bg-stone-800 p-6 overflow-auto relative">
+      <!-- Open folder button -->
+      <button @click="$store.files.openFolder()"
+        class="sticky top-0 px-6 py-4 transition bg-stone-700 border-2 border-stone-500 hover:border-stone-400 hover:shadow-lg focus:border-stone-300 rounded-2xl w-full flex flex-row items-center gap-4 outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="feather feather-folder">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span>Open Folder</span>
+      </button>
+
+      <!-- File list -->
+      <div class="flex flex-col h-full">
+        <div x-show="!$store.files.directory" class="-mx-6">
+          <template x-for="directory in $store.files.getKnownDirectories()" :key="directory.fullPath"
+            class="flex flex-row items-center gap-4 mt-4">
+            <button @click="$store.files.openCustomDirectoryPath(directory.fullPath)"
+              class="w-full max-w-full flex flex-row items-center gap-4 py-2 hover:bg-white/10 focus:bg-white/10 cursor-pointer px-6 outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="feather feather-save flex-shrink-0">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
               </svg>
-              <svg x-show="file.type == 'css'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512">
-                <path fill="#264de4" d="M71.357 460.819L30.272 0h451.456l-41.129 460.746L255.724 512z"/>
-                <path fill="#2965f1" d="M405.388 431.408l35.148-393.73H256v435.146z"/>
-                <path fill="#ebebeb" d="M124.46 208.59l5.065 56.517H256V208.59zM119.419 150.715H256V94.197H114.281zM256 355.372l-.248.066-62.944-16.996-4.023-45.076h-56.736l7.919 88.741 115.772 32.14.26-.073z"/>
-                <path fill="#fff" d="M255.805 208.59v56.517H325.4l-6.56 73.299-63.035 17.013v58.8l115.864-32.112.85-9.549 13.28-148.792 1.38-15.176 10.203-114.393H255.805v56.518h79.639L330.3 208.59z"/>
-              </svg>
-              <!-- End of file icons -->
-
-              <span x-text="file.name" class="truncate"></span>
-
-              <div x-show="$store.files.selectedFile?.file == file.name" @click.prevent.stop="$store.files.closeFilePreview()" title="Close file preview" class="flex-shrink-0 ml-auto p-0.5 rounded-full transition hover:bg-white/10">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <div class="flex flex-col truncate w-full text-left leading-4">
+                <span x-text="directory.dirName" class="truncate py-0.5"></span>
+                <small x-text="directory.dirPath" class="text-xs truncate"></small>
               </div>
             </button>
           </template>
+        </div>
 
-          <div x-show="$store.files.directory && $store.files.getFilteredFiles().length == 0" class="flex flex-col items-center justify-center gap-4 opacity-80 h-full text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-minus"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-            <div class="leading-4">
-              <p class="leading-5 mb-2">No files found with the current regex filter</p>
-              <small>Tip: Empty the "File regex" input to see all the files</small>
+        <template x-data="{ knownFileTypes: ['json', 'js', 'css'] }" x-for="file in $store.files.getFilteredFiles()"
+          :key="file.name" class="flex flex-row items-center gap-4 mt-4">
+          <button @click="$store.files.previewFile(file.name)"
+            class="flex flex-row items-center gap-4 py-2 hover:bg-white/10 focus:bg-white/10 cursor-pointer -mx-6 px-6 outline-none"
+            :class="{ 'bg-white/5': $store.files.selectedFile?.file == file.name }">
+            <!-- File icons -->
+            <svg x-show="!knownFileTypes.includes(file.type)" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" class="feather feather-file-text flex-shrink-0">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <svg x-show="file.type == 'json'" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+              focusable="false" aria-hidden="true" fill="#ffe400" viewBox="0 0 24 24" data-testid="DataObjectIcon">
+              <path
+                d="M4 7v2c0 .55-.45 1-1 1H2v4h1c.55 0 1 .45 1 1v2c0 1.65 1.35 3 3 3h3v-2H7c-.55 0-1-.45-1-1v-2c0-1.3-.84-2.42-2-2.83v-.34C5.16 11.42 6 10.3 6 9V7c0-.55.45-1 1-1h3V4H7C5.35 4 4 5.35 4 7zm17 3c-.55 0-1-.45-1-1V7c0-1.65-1.35-3-3-3h-3v2h3c.55 0 1 .45 1 1v2c0 1.3.84 2.42 2 2.83v.34c-1.16.41-2 1.52-2 2.83v2c0 .55-.45 1-1 1h-3v2h3c1.65 0 3-1.35 3-3v-2c0-.55.45-1 1-1h1v-4h-1z">
+              </path>
+            </svg>
+            <svg x-show="file.type == 'js'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 630 630" width="24"
+              height="24">
+              <rect width="630" height="630" fill="#f7df1e" />
+              <path
+                d="m423.2 492.19c12.69 20.72 29.2 35.95 58.4 35.95 24.53 0 40.2-12.26 40.2-29.2 0-20.3-16.1-27.49-43.1-39.3l-14.8-6.35c-42.72-18.2-71.1-41-71.1-89.2 0-44.4 33.83-78.2 86.7-78.2 37.64 0 64.7 13.1 84.2 47.4l-46.1 29.6c-10.15-18.2-21.1-25.37-38.1-25.37-17.34 0-28.33 11-28.33 25.37 0 17.76 11 24.95 36.4 35.95l14.8 6.34c50.3 21.57 78.7 43.56 78.7 93 0 53.3-41.87 82.5-98.1 82.5-54.98 0-90.5-26.2-107.88-60.54zm-209.13 5.13c9.3 16.5 17.76 30.45 38.1 30.45 19.45 0 31.72-7.61 31.72-37.2v-201.3h59.2v202.1c0 61.3-35.94 89.2-88.4 89.2-47.4 0-74.85-24.53-88.81-54.075z" />
+            </svg>
+            <svg x-show="file.type == 'css'" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+              viewBox="0 0 512 512">
+              <path fill="#264de4" d="M71.357 460.819L30.272 0h451.456l-41.129 460.746L255.724 512z" />
+              <path fill="#2965f1" d="M405.388 431.408l35.148-393.73H256v435.146z" />
+              <path fill="#ebebeb"
+                d="M124.46 208.59l5.065 56.517H256V208.59zM119.419 150.715H256V94.197H114.281zM256 355.372l-.248.066-62.944-16.996-4.023-45.076h-56.736l7.919 88.741 115.772 32.14.26-.073z" />
+              <path fill="#fff"
+                d="M255.805 208.59v56.517H325.4l-6.56 73.299-63.035 17.013v58.8l115.864-32.112.85-9.549 13.28-148.792 1.38-15.176 10.203-114.393H255.805v56.518h79.639L330.3 208.59z" />
+            </svg>
+            <!-- End of file icons -->
+
+            <span x-text="file.name" class="truncate"></span>
+
+            <div x-show="$store.files.selectedFile?.file == file.name"
+              @click.prevent.stop="$store.files.closeFilePreview()" title="Close file preview"
+              class="flex-shrink-0 ml-auto p-0.5 rounded-full transition hover:bg-white/10">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="feather feather-x">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
             </div>
+          </button>
+        </template>
+
+        <div x-show="$store.files.directory && $store.files.getFilteredFiles().length == 0"
+          class="flex flex-col items-center justify-center gap-4 opacity-80 h-full text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="feather feather-file-minus">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+          <div class="leading-4">
+            <p class="leading-5 mb-2">No files found with the current regex filter</p>
+            <small>Tip: Empty the "File regex" input to see all the files</small>
           </div>
-        </div>
-      </div>
-
-      <!-- Filters -->
-      <div class="flex flex-col gap-1 bg-stone-700 px-6 py-4">
-        <div class="flex flex-row items-center justify-between">
-          <h5 class="text-lg font-semibold">Filters</h5>
-          <button @click="$store.files.saveRegex()" class="px-3 py-1 text-sm rounded-lg transition bg-white/10 hover:bg-white/30 focus:ring focus:ring-white/50 outline-none">Save</button>
-        </div>
-
-        <div>
-          <small class="uppercase font-semibold text-white/70">File regex</small>
-          <input x-model="$store.files.regexFiles" spellcheck="false" type="text" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
         </div>
       </div>
     </div>
 
-    <!-- Main -->
-    <div class="flex flex-col w-full h-full">
-      <div class="flex flex-row justify-between gap-3 flex-shrink-0 items-center px-6 py-2 h-12 w-full bg-stone-800/50">
-        <div class="flex flex-row items-center gap-6">
-          <button x-show="$store.files.directory" @click="$store.files.openCustomDirectoryPath(undefined)" class="-m-2 p-2 rounded-full transition hover:bg-white/10">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-          </button>
-          <span x-text="$store.files.directory || 'No selected folder'" class="truncate leading-4 pt-0.5" :class="{ 'text-white/70': !$store.files.directory }"></span>
-        </div>
-        <svg @click="$store.files.toggleShowConfig()" :class="$store.files.currentConfig.languageKeyCode ? 'cursor-pointer' : 'opacity-20'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    <!-- Filters -->
+    <div class="flex flex-col gap-1 bg-stone-700 px-6 py-4">
+      <div class="flex flex-row items-center justify-between">
+        <h5 class="text-lg font-semibold">Filters</h5>
+        <button @click="$store.files.saveRegex()"
+          class="px-3 py-1 text-sm rounded-lg transition bg-white/10 hover:bg-white/30 focus:ring focus:ring-white/50 outline-none">Save</button>
       </div>
 
-      <div class="flex-1 min-h-0 grid h-full w-full" :class="$store.files.shouldShowFilePreview() ? 'grid-cols-2' : 'grid-cols-1'">
-        <div x-show="$store.files.shouldShowFilePreview()" id="container" class="h-full w-full bg-stone-800/20">
-          <div x-cloak x-show="$store.files.directory == undefined" class="flex flex-col items-center justify-center h-full w-full opacity-50 px-6 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder mb-4"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-            <h3 class="text-xl font-semibold">No folder opened</h3>
-            <span>Click on the "Open Folder" button to select a folder</span>
+      <div>
+        <small class="uppercase font-semibold text-white/70">File regex</small>
+        <input x-model="$store.files.regexFiles" spellcheck="false" type="text"
+          class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="flex flex-col w-full h-full">
+    <div class="flex flex-row justify-between gap-3 flex-shrink-0 items-center px-6 py-2 h-12 w-full bg-stone-800/50">
+      <div class="flex flex-row items-center gap-6">
+        <button x-show="$store.files.directory" @click="$store.files.openCustomDirectoryPath(undefined)"
+          class="-m-2 p-2 rounded-full transition hover:bg-white/10">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="feather feather-home">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </button>
+        <span x-text="$store.files.directory || 'No selected folder'" class="truncate leading-4 pt-0.5"
+          :class="{ 'text-white/70': !$store.files.directory }"></span>
+      </div>
+
+      <div class="flex flex-row gap-4 items-center justify-center">
+        <!-- Git branch -->
+        <div class="flex items-center gap-1 rounded-full px-2 py-1"
+          x-show="$store.files.gitBranches?.[$store.files.directory] !== undefined" :class="{
+            'bg-blue-500': !$store.files.differentBranches,
+            'bg-red-500': $store.files.differentBranches
+          }">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="feather feather-git-branch">
+            <line x1="6" y1="3" x2="6" y2="15"></line>
+            <circle cx="18" cy="6" r="3"></circle>
+            <circle cx="6" cy="18" r="3"></circle>
+            <path d="M18 9a9 9 0 0 1-9 9"></path>
+          </svg>
+
+          <small x-text="$store.files.gitBranches?.[$store.files.directory]?.current"></small>
+        </div>
+
+        <svg @click="$store.files.toggleShowConfig()"
+          :class="$store.files.currentConfig.languageKeyCode ? 'cursor-pointer' : 'opacity-20'"
+          xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="feather feather-settings">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+          </path>
+        </svg>
+      </div>
+    </div>
+
+    <div class="flex-1 min-h-0 grid h-full w-full"
+      :class="$store.files.shouldShowFilePreview() ? 'grid-cols-2' : 'grid-cols-1'">
+      <div x-show="$store.files.shouldShowFilePreview()" id="container" class="h-full w-full bg-stone-800/20">
+        <div x-cloak x-show="$store.files.directory == undefined"
+          class="flex flex-col items-center justify-center h-full w-full opacity-50 px-6 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="feather feather-folder mb-4">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <h3 class="text-xl font-semibold">No folder opened</h3>
+          <span>Click on the "Open Folder" button to select a folder</span>
+        </div>
+
+        <div x-cloak x-show="$store.files.directory != undefined && $store.files.selectedFile?.file == undefined"
+          class="flex flex-col items-center justify-center h-full w-full opacity-50 px-6 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="feather feather-file mb-4">
+            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+            <polyline points="13 2 13 9 20 9"></polyline>
+          </svg>
+          <h3 class="text-xl font-semibold">No file selected</h3>
+          <span>Click on a file on the sidebar to preview it</span>
+        </div>
+      </div>
+
+      <form
+        x-show="($store.files.directory != undefined && !$store.files.currentConfig.languageKeyCode) || $store.files.forceShowConfig"
+        @submit.prevent="$store.files.saveDirectoryConf()"
+        class="flex flex-col gap-4 h-full w-full px-6 py-4 overflow-auto">
+        <h2 class="text-2xl font-semibold">Initial configuration</h2>
+
+        <div>
+          <small class="uppercase font-semibold text-white/70">DeepL API key <span class="text-red-500">*</span></small>
+          <input spellcheck="false" type="text" x-model="$store.files.formConfig.deeplAPIKey"
+            placeholder="UUID-like API key"
+            class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+        </div>
+
+        <div>
+          <small class="uppercase font-semibold text-white/70">Language code <span class="text-red-500">*</span></small>
+          <input spellcheck="false" type="text" x-model="$store.files.formConfig.languageKeyCode"
+            placeholder="Key of language code string in JSON (e.g. 'meta.languageCode')"
+            class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+        </div>
+
+        <div class="flex flex-row gap-4">
+          <div class="basis-3/4">
+            <small class="uppercase font-semibold text-white/70">Translations string object <span
+                class="text-red-500">*</span></small>
+            <input spellcheck="false" type="text" x-model="$store.files.formConfig.translationStringsJSONPath"
+              placeholder="Key of translations strings in JSON (e.g. 'strings')"
+              class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
           </div>
 
-          <div x-cloak x-show="$store.files.directory != undefined && $store.files.selectedFile?.file == undefined" class="flex flex-col items-center justify-center h-full w-full opacity-50 px-6 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file mb-4"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-            <h3 class="text-xl font-semibold">No file selected</h3>
-            <span>Click on a file on the sidebar to preview it</span>
+          <div class="basis-1/4">
+            <label for="config.defaultLanguageSelect"
+              class="uppercase text-xs font-semibold text-white/70 pb-[1px]">Default language</label>
+            <select id="config.defaultLanguageSelect" x-model="$store.files.formConfig.defaultLanguage"
+              :value="$store.files.formConfig?.defaultLanguage"
+              class="px-2 py-1 text-lg w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+              <option value="" :selected="$store.files.formConfig?.defaultLanguage == ''">None</option>
+              <template x-for="language in $store.files.getDetectedLanguages($store.files.formConfig.languageKeyCode)">
+                <option :value="language" x-text="language ?? 'No target key code set'"
+                  :selected="$store.files.formConfig?.defaultLanguage == language"></option>
+              </template>
+            </select>
           </div>
         </div>
 
-        <form x-show="($store.files.directory != undefined && !$store.files.currentConfig.languageKeyCode) || $store.files.forceShowConfig" @submit.prevent="$store.files.saveDirectoryConf()" class="flex flex-col gap-4 h-full w-full px-6 py-4 overflow-auto">
-          <h2 class="text-2xl font-semibold">Initial configuration</h2>
+        <div>
+          <small class="uppercase font-semibold text-white/70">Bypass language using default lang</small>
 
-          <div>
-            <small class="uppercase font-semibold text-white/70">DeepL API key <span class="text-red-500">*</span></small>
-            <input spellcheck="false" type="text" x-model="$store.files.formConfig.deeplAPIKey" placeholder="UUID-like API key" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
-          </div>
-
-          <div>
-            <small class="uppercase font-semibold text-white/70">Language code <span class="text-red-500">*</span></small>
-            <input spellcheck="false" type="text" x-model="$store.files.formConfig.languageKeyCode" placeholder="Key of language code string in JSON (e.g. 'meta.languageCode')" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
-          </div>
-
-          <div class="flex flex-row gap-4">
-            <div class="basis-3/4">
-              <small class="uppercase font-semibold text-white/70">Translations string object <span class="text-red-500">*</span></small>
-              <input spellcheck="false" type="text" x-model="$store.files.formConfig.translationStringsJSONPath" placeholder="Key of translations strings in JSON (e.g. 'strings')" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
+          <template x-for="(bypass, index) in $store.files.formConfig.bypasses" :key="index">
+            <div class="flex flex-row items-center gap-3 py-1">
+              <input spellcheck="false" type="text" x-model="bypass.target" placeholder="Target code (e.g. IT)"
+                class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 outline-none">
+              <span class="flex-shrink-0">will default to</span>
+              <input spellcheck="false" type="text" x-model="bypass.source" placeholder="Default code (e.g. EN)"
+                class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 outline-none">
+              <button @click.prevent="$store.files.formConfig.bypasses.splice(index, 1)"
+                class="px-3 py-2 h-full text-sm rounded-lg transition bg-white/10 hover:bg-white/30">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="feather feather-x-circle">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+              </button>
             </div>
+          </template>
 
-            <div class="basis-1/4">
-              <label for="config.defaultLanguageSelect" class="uppercase text-xs font-semibold text-white/70 pb-[1px]">Default language</label>
-              <select id="config.defaultLanguageSelect" x-model="$store.files.formConfig.defaultLanguage" :value="$store.files.formConfig?.defaultLanguage" class="px-2 py-1 text-lg w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 mt-1 outline-none">
-                <option value="" :selected="$store.files.formConfig?.defaultLanguage == ''">None</option>
-                <template x-for="language in $store.files.getDetectedLanguages($store.files.formConfig.languageKeyCode)">
-                  <option :value="language" x-text="language ?? 'No target key code set'" :selected="$store.files.formConfig?.defaultLanguage == language"></option>
-                </template>
-              </select>
-            </div>
-          </div>
+          <button @click.prevent="$store.files.addNewBypassRow()"
+            class="flex flex-row gap-3 items-center px-4 py-2 w-full text-sm rounded-lg transition bg-white/10 hover:bg-white/30 mt-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="feather feather-plus">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add
+          </button>
+        </div>
 
-          <div>
-            <small class="uppercase font-semibold text-white/70">Bypass language using default lang</small>
-
-            <template x-for="(bypass, index) in $store.files.formConfig.bypasses" :key="index">
-              <div class="flex flex-row items-center gap-3 py-1">
-                <input spellcheck="false" type="text" x-model="bypass.target" placeholder="Target code (e.g. IT)" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 outline-none">
-                <span class="flex-shrink-0">will default to</span>
-                <input spellcheck="false" type="text" x-model="bypass.source" placeholder="Default code (e.g. EN)" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 outline-none">
-                <button @click.prevent="$store.files.formConfig.bypasses.splice(index, 1)" class="px-3 py-2 h-full text-sm rounded-lg transition bg-white/10 hover:bg-white/30">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x-circle"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                </button>
-              </div>
-            </template>
-
-            <button @click.prevent="$store.files.addNewBypassRow()" class="flex flex-row gap-3 items-center px-4 py-2 w-full text-sm rounded-lg transition bg-white/10 hover:bg-white/30 mt-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              Add
+        <div>
+          <small class="uppercase font-semibold text-white/70">Duplicate output folder</small>
+          <div class="flex flex-row items-center gap-2 mt-1">
+            <input spellcheck="false" type="text" x-model="$store.files.formConfig.directoryPathTargetOutputDuplicate"
+              placeholder="Path of the target output directory"
+              class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 outline-none"
+              7>
+            <button @click.prevent="$store.files.openFolderForPathTargetOutputDuplicate()"
+              class="px-3 py-2 h-full text-sm rounded-lg transition bg-white/10 hover:bg-white/30">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="feather feather-folder">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
             </button>
           </div>
 
-          <div>
-            <small class="uppercase font-semibold text-white/70">Duplicate output folder</small>
-            <div class="flex flex-row items-center gap-2 mt-1">
-              <input spellcheck="false" type="text" x-model="$store.files.formConfig.directoryPathTargetOutputDuplicate" placeholder="Path of the target output directory" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 outline-none"7>
-              <button @click.prevent="$store.files.openFolderForPathTargetOutputDuplicate()" class="px-3 py-2 h-full text-sm rounded-lg transition bg-white/10 hover:bg-white/30">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          <input spellcheck="false" type="text" x-model="$store.files.formConfig.outputDuplicateFileNameStructure"
+            placeholder="Output file names (empty is the same as original)"
+            class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 outline-none mt-3"
+            7>
+          <small class="text-sm text-white/60">Available variables: {languageCode}, {oldFileName}</small>
+        </div>
+
+        <div class="flex flex-row gap-4 items-center mt-4">
+          <button @click.prevent="$store.files.saveDirectoryConf()" type="submit"
+            class="px-4 py-2 text-sm rounded-lg transition bg-white/10 hover:bg-white/30 ml-auto">Confirm</button>
+        </div>
+      </form>
+
+      <div
+        x-show="$store.files.directory != undefined && $store.files.currentConfig.languageKeyCode && !$store.files.forceShowConfig"
+        class="flex flex-col gap-4 px-6 py-4 flex-1 min-h-0">
+        <h2 class="text-2xl font-semibold pb-2">Manage translations</h2>
+
+        <div>
+          <h4 class="text-lg">Detected languages</h4>
+          <div class="flex flex-row gap-3 overflow-auto pb-3 mt-1">
+            <template x-for="language in $store.files.getDetectedLanguages()" :key="language">
+              <span x-text="language"
+                class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800"></span>
+            </template>
+
+            <small x-show="$store.files.getDetectedLanguages().length == 0" class="text-sm text-white/60 italic">No
+              languages detected</small>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-lg">Default language references</h4>
+          <div class="flex flex-row gap-3 overflow-auto pb-3 mt-1">
+            <template x-for="bypass in $store.files.currentConfig.bypasses" :key="bypass.target">
+              <div class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800">
+                <span x-text="bypass.target"></span> > <span x-text="bypass.source"></span>
+              </div>
+            </template>
+
+            <small x-show="$store.files.currentConfig.bypasses?.length == 0" class="text-sm text-white/60 italic">No
+              references configured</small>
+          </div>
+        </div>
+
+        <div x-show="Object.keys($store.files.gitBranches).length > 0">
+          <h4>Git repositories</h4>
+
+          <div class="flex flex-row gap-3 overflow-auto pb-3 mt-1">
+            <!-- If all branches are not the same, show the following -->
+            <span x-show="$store.files.differentBranches"
+              class="flex items-center justify-center text-sm font-semibold px-2 py-1 rounded-full bg-red-500"
+              title="Not all branches are the same">
+
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="feather feather-alert-triangle">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                </path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </span>
+
+
+            <template x-for="[repoPath, repo] in Object.entries($store.files.gitBranches)" :key="repoPath">
+              <div class="text-sm text-white px-3 py-1 rounded-full bg-stone-800">
+                <span x-text="repoPath == $store.files.directory ? 'main' : 'duplicate'"></span>: <span
+                  class="font-semibold" x-text="repo.current"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <div x-data="{ newTranslations: {} }" class="flex flex-col min-h-0 h-full">
+          <div class="flex flex-row items-center gap-3">
+            <h4 class="text-lg">Translations</h4>
+            <span x-text="$store.files.allTranslationsKeys?.length + ' keys'"
+              class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800"></span>
+            <span x-show="$store.files.searchTranslationsQuery != ''"
+              x-text="$store.files.getFilteredTranslationKeys?.length + ' search results'"
+              class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800"></span>
+          </div>
+
+          <div x-show="$store.files.selectedTranslationObj.key == null"
+            class="flex flex-col overflow-auto mt-2 border border-white/50 rounded-xl h-full overflow-hidden">
+            <div
+              class="flex flex-row items-center bg-stone-800 transition border-b border-white/10 focus-within:border-white/50 hover:border-white/40">
+              <input type="text" spellcheck="false" x-model="$store.files.searchTranslationsQuery"
+                placeholder="Search translations" class="px-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
+              <button @click="$store.files.searchTranslationsQuery = ''"
+                x-show="$store.files.searchTranslationsQuery != ''" class="p-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="feather feather-x">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
 
-            <input spellcheck="false" type="text" x-model="$store.files.formConfig.outputDuplicateFileNameStructure" placeholder="Output file names (empty is the same as original)" class="px-3 py-1 w-full rounded-lg transition border-2 border-white/30 hover:border-white/40 focus:border-white/50 bg-stone-800 outline-none mt-3"7>
-            <small class="text-sm text-white/60">Available variables: {languageCode}, {oldFileName}</small>
-          </div>
-
-          <div class="flex flex-row gap-4 items-center mt-4">
-            <button @click.prevent="$store.files.saveDirectoryConf()" type="submit" class="px-4 py-2 text-sm rounded-lg transition bg-white/10 hover:bg-white/30 ml-auto">Confirm</button>
-          </div>
-        </form>
-
-        <div x-show="$store.files.directory != undefined && $store.files.currentConfig.languageKeyCode && !$store.files.forceShowConfig" class="flex flex-col gap-4 px-6 py-4 flex-1 min-h-0">
-          <h2 class="text-2xl font-semibold pb-2">Manage translations</h2>
-
-          <div>
-            <h4 class="text-lg">Detected languages</h4>
-            <div class="flex flex-row gap-3 overflow-auto pb-3 mt-1">
-              <template x-for="language in $store.files.getDetectedLanguages()" :key="language">
-                <span x-text="language" class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800"></span>
+            <div class="flex flex-col overflow-auto">
+              <button @click="newTranslations = {}; $store.files.createNewTranslation()"
+                :disabled="$store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())"
+                class="flex flex-row items-center gap-3 px-4 py-3 transition bg-transparent hover:bg-stone-800/80 text-white/70 border-b border-white/10">
+                <svg
+                  x-show="!$store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())"
+                  viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span x-show="$store.files.searchTranslationsQuery == ''" class="text-sm">New translation key</span>
+                <span
+                  x-show="$store.files.searchTranslationsQuery != '' && !$store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())"
+                  class="text-sm">
+                  Add new translation key "<span x-text="$store.files.searchTranslationsQuery"></span>"
+                </span>
+                <span
+                  x-show="$store.files.searchTranslationsQuery != '' && $store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())"
+                  class="text-sm">
+                  Translation key "<span x-text="$store.files.searchTranslationsQuery"></span>" already exists
+                </span>
+              </button>
+              <template x-for="key in $store.files.getFilteredTranslationKeys" :key="key">
+                <button @click="newTranslations = {}; $store.files.showTranslationKey(key)"
+                  class="text-left px-4 py-2 transition bg-transparent hover:bg-stone-800/80">
+                  <span x-text="key" class="text-sm font-semibold text-white/70"></span>
+                </button>
               </template>
-
-              <small x-show="$store.files.getDetectedLanguages().length == 0" class="text-sm text-white/60 italic">No languages detected</small>
             </div>
           </div>
 
-          <div>
-            <h4 class="text-lg">Default language references</h4>
-            <div class="flex flex-row gap-3 overflow-auto pb-3 mt-1">
-              <template x-for="bypass in $store.files.currentConfig.bypasses" :key="bypass.target">
-                <div class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800">
-                  <span x-text="bypass.target"></span> > <span x-text="bypass.source"></span>
-                </div>
-              </template>
-
-              <small x-show="$store.files.currentConfig.bypasses?.length == 0" class="text-sm text-white/60 italic">No references configured</small>
-            </div>
-          </div>
-
-          <div x-data="{ newTranslations: {} }" class="flex flex-col min-h-0 h-full">
-            <div class="flex flex-row items-center gap-3">
-              <h4 class="text-lg">Translations</h4>
-              <span x-text="$store.files.allTranslationsKeys?.length + ' keys'" class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800"></span>
-              <span x-show="$store.files.searchTranslationsQuery != ''" x-text="$store.files.getFilteredTranslationKeys?.length + ' search results'" class="text-sm font-semibold text-white/70 px-3 py-1 rounded-full bg-stone-800"></span>
-            </div>
-
-            <div x-show="$store.files.selectedTranslationObj.key == null" class="flex flex-col overflow-auto mt-2 border border-white/50 rounded-xl h-full overflow-hidden">
-              <div class="flex flex-row items-center bg-stone-800 transition border-b border-white/10 focus-within:border-white/50 hover:border-white/40">
-                <input type="text" spellcheck="false" x-model="$store.files.searchTranslationsQuery" placeholder="Search translations" class="px-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
-                <button @click="$store.files.searchTranslationsQuery = ''" x-show="$store.files.searchTranslationsQuery != ''" class="p-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-              </div>
-
-              <div class="flex flex-col overflow-auto">
-                <button @click="newTranslations = {}; $store.files.createNewTranslation()" :disabled="$store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())" class="flex flex-row items-center gap-3 px-4 py-3 transition bg-transparent hover:bg-stone-800/80 text-white/70 border-b border-white/10">
-                  <svg x-show="!$store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  <span x-show="$store.files.searchTranslationsQuery == ''" class="text-sm">New translation key</span>
-                  <span x-show="$store.files.searchTranslationsQuery != '' && !$store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())" class="text-sm">
-                    Add new translation key "<span x-text="$store.files.searchTranslationsQuery"></span>"
-                  </span>
-                  <span x-show="$store.files.searchTranslationsQuery != '' && $store.files.getFilteredTranslationKeys.map(e => e.toLowerCase()).includes($store.files.searchTranslationsQuery.toLowerCase())" class="text-sm">
-                    Translation key "<span x-text="$store.files.searchTranslationsQuery"></span>" already exists
-                  </span>
-                </button>
-                <template x-for="key in $store.files.getFilteredTranslationKeys" :key="key">
-                  <button @click="newTranslations = {}; $store.files.showTranslationKey(key)" class="text-left px-4 py-2 transition bg-transparent hover:bg-stone-800/80">
-                    <span x-text="key" class="text-sm font-semibold text-white/70"></span>
-                  </button>
-                </template>
-              </div>
-            </div>
-
-            <div x-show="$store.files.selectedTranslationObj?.key != null" class="flex flex-col mt-2 border border-white/50 rounded-xl h-full overflow-hidden">
-              <div class="flex flex-row items-center bg-stone-800 transition border-b border-white/10 focus-within:border-white/50 hover:border-white/40">
-                <button @click="$store.files.closeTranslationKeyView(); newTranslations = {}" class="p-3 mx-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                </button>
-                <input type="text" spellcheck="false" x-model="$store.files.selectedTranslationObj.newKey" :value="$store.files.selectedTranslationObj.key" placeholder="Translation key name" class="pr-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
-                <button
-                  @click="$store.files.saveTranslations(newTranslations)"
-                  x-show="
+          <div x-show="$store.files.selectedTranslationObj?.key != null"
+            class="flex flex-col mt-2 border border-white/50 rounded-xl h-full overflow-hidden">
+            <div
+              class="flex flex-row items-center bg-stone-800 transition border-b border-white/10 focus-within:border-white/50 hover:border-white/40">
+              <button @click="$store.files.closeTranslationKeyView(); newTranslations = {}" class="p-3 mx-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="feather feather-arrow-left">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+              </button>
+              <input type="text" spellcheck="false" x-model="$store.files.selectedTranslationObj.newKey"
+                :value="$store.files.selectedTranslationObj.key" placeholder="Translation key name"
+                class="pr-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
+              <button @click="$store.files.saveTranslations(newTranslations)" x-show="
                     ($store.files.haveTranslationsChanged(newTranslations) && ($store.files.selectedTranslationObj.newKey?.trim() !== '' || $store.files.selectedTranslationObj.key?.trim() !== '')
                     || ($store.files.selectedTranslationObj.newKey?.trim() !== '' && $store.files.selectedTranslationObj.key !== $store.files.selectedTranslationObj.newKey))
-                  "
-                  class="px-4 py-1.5 mr-1.5 bg-blue-700 text-white rounded-md shadow"
-                >
-                  Save
-                </button>
-              </div>
+                  " class="px-4 py-1.5 mr-1.5 bg-blue-700 text-white rounded-md shadow">
+                Save
+              </button>
+            </div>
 
-              <div class="flex flex-col overflow-auto">
-                <template x-for="lang in $store.files.getDetectedLanguages()" :key="lang">
-                  <div
-                   class="flex flex-row items-center gap-3 px-4 py-1 transition border-b border-white/10"
-                   :class="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')) ? 'hover:bg-stone-700 bg-stone-800' : 'bg-transparent hover:bg-stone-800/80'"
-                  >
-                    <span
-                     x-text="lang"
-                     class="text-sm font-semibold font-mono text-white/70 px-3 py-1 rounded-full"
-                     :class="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')) ? 'bg-stone-600' : 'bg-stone-800'"
-                    ></span>
-                    <input type="text" spellcheck="false" x-model="newTranslations[lang]" :value="_get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')" placeholder="Value for translation" class="pr-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
+            <div class="flex flex-col overflow-auto">
+              <template x-for="lang in $store.files.getDetectedLanguages()" :key="lang">
+                <div class="flex flex-row items-center gap-3 px-4 py-1 transition border-b border-white/10"
+                  :class="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')) ? 'hover:bg-stone-700 bg-stone-800' : 'bg-transparent hover:bg-stone-800/80'">
+                  <span x-text="lang" class="text-sm font-semibold font-mono text-white/70 px-3 py-1 rounded-full"
+                    :class="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')) ? 'bg-stone-600' : 'bg-stone-800'"></span>
+                  <input type="text" spellcheck="false" x-model="newTranslations[lang]"
+                    :value="_get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')"
+                    placeholder="Value for translation"
+                    class="pr-4 py-3 w-full rounded-tl-lg bg-transparent outline-none">
 
-                    <div
-                     class="flex flex-row gap-2 items-center"
-                    >
-                      <div x-data="{ showPopup: false }" class="relative" @mouseleave="showPopup = false">
-                        <button
-                         title="Fetch translation based on other languages"
-                         @mouseover="showPopup = true"
-                         class="group relative h-10 w-10 flex items-center justify-center rounded-full bg-stone-900 hover:bg-stone-800 transition"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-down-circle"><circle cx="12" cy="12" r="10"></circle><polyline points="8 12 12 16 16 12"></polyline><line x1="12" y1="8" x2="12" y2="16"></line></svg>
-                          <div class="group-hover:bg-stone-800 absolute -bottom-1 -left-1 h-6 w-6 flex items-center justify-center rounded-full bg-stone-900 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-globe"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                          </div>
-                        </button>
-
+                  <div class="flex flex-row gap-2 items-center">
+                    <div x-data="{ showPopup: false }" class="relative" @mouseleave="showPopup = false">
+                      <button title="Fetch translation based on other languages" @mouseover="showPopup = true"
+                        class="group relative h-10 w-10 flex items-center justify-center rounded-full bg-stone-900 hover:bg-stone-800 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="feather feather-arrow-down-circle">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="8 12 12 16 16 12"></polyline>
+                          <line x1="12" y1="8" x2="12" y2="16"></line>
+                        </svg>
                         <div
-                         x-show="showPopup"
-                         x-transition.scale.origin.top.right
-                         class="absolute top-3/4 right-0 px-2 pt-1.5 pb-3 flex flex-col items-end justify-center z-20"
-                        >
-                          <div
-                           class="
+                          class="group-hover:bg-stone-800 absolute -bottom-1 -left-1 h-6 w-6 flex items-center justify-center rounded-full bg-stone-900 transition">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="feather feather-globe">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path
+                              d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                            </path>
+                          </svg>
+                        </div>
+                      </button>
+
+                      <div x-show="showPopup" x-transition.scale.origin.top.right
+                        class="absolute top-3/4 right-0 px-2 pt-1.5 pb-3 flex flex-col items-end justify-center z-20">
+                        <div class="
                              w-0 h-0 mr-1.5 rounded-t
                              border-l-[6px] border-l-transparent
                              border-b-[8px] border-b-stone-600
                              border-r-[6px] border-r-transparent
                              shadow
-                           "
-                          ></div>
-                          <div class="w-auto flex flex-col rounded-lg bg-stone-600 overflow-hidden shadow">
-                            <small class="px-3 pt-2 pb-1.5 font-semibold">Fetch translation based on other languages</small>
-                            <div class="flex flex-row border-t border-white/30 divide-x divide-white/20 -ml-[1px]">
-                              <template x-for="language in $store.files.getDetectedLanguages().filter(testLang => testLang !== lang) || []">
-                                <button
-                                 @click="PRELOAD_CONTEXT.translate(_get($store.files.selectedTranslationObj.translations, `${language}.translation`, ''), lang).then((res) => { newTranslations[lang] = res.text; showPopup = false })"
-                                 class="font-mono px-2 py-1 bg-transparent hover:bg-white/20 transition"
-                                >
-                                  <span x-text="language"></span>
-                                </button>
-                              </template>
-                            </div>
+                           "></div>
+                        <div class="w-auto flex flex-col rounded-lg bg-stone-600 overflow-hidden shadow">
+                          <small class="px-3 pt-2 pb-1.5 font-semibold">Fetch translation based on other
+                            languages</small>
+                          <div class="flex flex-row border-t border-white/30 divide-x divide-white/20 -ml-[1px]">
+                            <template
+                              x-for="language in $store.files.getDetectedLanguages().filter(testLang => testLang !== lang) || []">
+                              <button
+                                @click="PRELOAD_CONTEXT.translate(_get($store.files.selectedTranslationObj.translations, `${language}.translation`, ''), lang).then((res) => { newTranslations[lang] = res.text; showPopup = false })"
+                                class="font-mono px-2 py-1 bg-transparent hover:bg-white/20 transition">
+                                <span x-text="language"></span>
+                              </button>
+                            </template>
                           </div>
                         </div>
                       </div>
-
-                      <button
-                       title="Fetch other languages based on this translation"
-                       @click="await $store.files.fillTranslationsFromSelectedTranslation(newTranslations, lang)"
-                       class="group relative h-10 w-10 flex items-center justify-center rounded-full bg-stone-900 hover:bg-stone-800 transition"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up-circle"><circle cx="12" cy="12" r="10"></circle><polyline points="16 12 12 8 8 12"></polyline><line x1="12" y1="16" x2="12" y2="8"></line></svg>
-                        <div class="group-hover:bg-stone-800 absolute -bottom-1 -left-1 h-6 w-6 flex items-center justify-center rounded-full bg-stone-900 transition">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-globe"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                        </div>
-                      </button>
-
-                      <button
-                       title="Reset edited translation"
-                       @click="newTranslations[lang] = _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')"
-                       x-show="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, ''))"
-                       class="h-10 w-10 rounded-full flex items-center justify-center bg-stone-900 hover:bg-stone-800 transition"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rotate-ccw"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-                      </button>
-
-                      <button
-                       title="Save edited translation"
-                       @click="$store.files.saveTranslations(newTranslations, lang)"
-                       x-show="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, ''))"
-                       class="h-10 w-10 rounded-full flex items-center justify-center bg-stone-900 hover:bg-stone-800 transition"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                      </button>
                     </div>
+
+                    <button title="Fetch other languages based on this translation"
+                      @click="await $store.files.fillTranslationsFromSelectedTranslation(newTranslations, lang)"
+                      class="group relative h-10 w-10 flex items-center justify-center rounded-full bg-stone-900 hover:bg-stone-800 transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-arrow-up-circle">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="16 12 12 8 8 12"></polyline>
+                        <line x1="12" y1="16" x2="12" y2="8"></line>
+                      </svg>
+                      <div
+                        class="group-hover:bg-stone-800 absolute -bottom-1 -left-1 h-6 w-6 flex items-center justify-center rounded-full bg-stone-900 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="feather feather-globe">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="2" y1="12" x2="22" y2="12"></line>
+                          <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                          </path>
+                        </svg>
+                      </div>
+                    </button>
+
+                    <button title="Reset edited translation"
+                      @click="newTranslations[lang] = _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, '')"
+                      x-show="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, ''))"
+                      class="h-10 w-10 rounded-full flex items-center justify-center bg-stone-900 hover:bg-stone-800 transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-rotate-ccw">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                      </svg>
+                    </button>
+
+                    <button title="Save edited translation"
+                      @click="$store.files.saveTranslations(newTranslations, lang)"
+                      x-show="(newTranslations[lang] != undefined && newTranslations[lang] != _get($store.files.selectedTranslationObj.translations, `${lang}.translation`, ''))"
+                      class="h-10 w-10 rounded-full flex items-center justify-center bg-stone-900 hover:bg-stone-800 transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-save">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                      </svg>
+                    </button>
                   </div>
-                </template>
-              </div>
+                </div>
+              </template>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>
